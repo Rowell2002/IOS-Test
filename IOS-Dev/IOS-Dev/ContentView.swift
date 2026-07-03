@@ -43,6 +43,15 @@ struct HomeScreen: View {
                         .foregroundStyle(.white)
                         .clipShape(Capsule())
                 }
+                NavigationLink(destination: QuizRushGameView()) {
+                    Text("Quiz Rush")
+                        .font(.title)
+                        .padding()
+                        .frame(maxWidth: 200)
+                        .background(Color.purple)
+                        .foregroundStyle(.white)
+                        .clipShape(Capsule())
+                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -421,6 +430,610 @@ struct TileCard: View {
             .onTapGesture {
                 onTap()
             }
+    }
+}
+
+// MARK: - HTML Decoding Extension
+extension String {
+    var htmlDecoded: String {
+        var result = self
+        let entities = [
+            "&quot;": "\"",
+            "&#039;": "'",
+            "&amp;": "&",
+            "&lt;": "<",
+            "&gt;": ">",
+            "&nbsp;": " ",
+            "&rsquo;": "’",
+            "&lsquo;": "‘",
+            "&ldquo;": "“",
+            "&rdquo;": "”",
+            "&hellip;": "…",
+            "&mdash;": "—",
+            "&ndash;": "–",
+            "&deg;": "°",
+            "&aacute;": "á",
+            "&eacute;": "é",
+            "&iacute;": "í",
+            "&oacute;": "ó",
+            "&uacute;": "ú",
+            "&ntilde;": "ñ",
+            "&uuml;": "ü",
+            "&Aacute;": "Á",
+            "&Eacute;": "É",
+            "&Iacute;": "Í",
+            "&Oacute;": "Ó",
+            "&Uacute;": "Ú",
+            "&Ntilde;": "Ñ",
+            "&Uuml;": "Ü"
+        ]
+        
+        for (entity, unicode) in entities {
+            result = result.replacingOccurrences(of: entity, with: unicode)
+        }
+        
+        var finalResult = ""
+        var currentIndex = result.startIndex
+        
+        while currentIndex < result.endIndex {
+            if result[currentIndex...].hasPrefix("&#") {
+                if let semicolonIndex = result[currentIndex...].firstIndex(of: ";") {
+                    let startOfNumber = result.index(currentIndex, offsetBy: 2)
+                    let numberString = String(result[startOfNumber..<semicolonIndex])
+                    
+                    var charCode: UInt32? = nil
+                    if numberString.hasPrefix("x") || numberString.hasPrefix("X") {
+                        let hexString = String(numberString.dropFirst())
+                        charCode = UInt32(hexString, radix: 16)
+                    } else {
+                        charCode = UInt32(numberString, radix: 10)
+                    }
+                    
+                    if let code = charCode, let unicodeChar = UnicodeScalar(code) {
+                        finalResult.append(Character(unicodeChar))
+                        currentIndex = result.index(after: semicolonIndex)
+                        continue
+                    }
+                }
+            }
+            finalResult.append(result[currentIndex])
+            currentIndex = result.index(after: currentIndex)
+        }
+        
+        return finalResult
+    }
+}
+
+// MARK: - Quiz Models
+struct QuizQuestion: Identifiable {
+    let id = UUID()
+    let category: String
+    let question: String
+    let correctAnswer: String
+    let allAnswers: [String]
+}
+
+struct TriviaResponse: Codable {
+    let responseCode: Int
+    let results: [TriviaRawQuestion]
+    
+    enum CodingKeys: String, CodingKey {
+        case responseCode = "response_code"
+        case results
+    }
+}
+
+struct TriviaRawQuestion: Codable {
+    let category: String
+    let type: String
+    let difficulty: String
+    let question: String
+    let correctAnswer: String
+    let incorrectAnswers: [String]
+    
+    enum CodingKeys: String, CodingKey {
+        case category, type, difficulty, question
+        case correctAnswer = "correct_answer"
+        case incorrectAnswers = "incorrect_answers"
+    }
+}
+
+// MARK: - Game Load State
+enum GameLoadState {
+    case idle
+    case loading
+    case success([QuizQuestion])
+    case failure(String)
+}
+
+// MARK: - Quiz Rush Main View
+struct QuizRushGameView: View {
+    @Environment(\.dismiss) private var dismiss
+    @AppStorage("quizRushHighScore") private var highScore = 0
+    
+    @State private var loadState: GameLoadState = .idle
+    @State private var currentQuestionIndex = 0
+    @State private var score = 0
+    @State private var streak = 0
+    @State private var maxStreak = 0
+    @State private var selectedAnswerIndex: Int? = nil
+    @State private var hasAnswered = false
+    @State private var isGameOver = false
+    @State private var streakAnimationScale: CGFloat = 1.0
+    @State private var isAdvancing = false
+    
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: [.black, .purple.opacity(0.75)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                .ignoresSafeArea()
+            
+            VStack {
+                switch loadState {
+                case .idle:
+                    Color.clear.onAppear {
+                        fetchQuestions()
+                    }
+                case .loading:
+                    VStack(spacing: 20) {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .purple))
+                            .scaleEffect(2)
+                        Text("Loading Questions...")
+                            .font(.headline)
+                            .foregroundColor(.white.opacity(0.8))
+                    }
+                case .success(let questions):
+                    if isGameOver {
+                        QuizGameOverView(score: score, maxStreak: maxStreak, highScore: highScore) {
+                            resetGame()
+                        }
+                    } else {
+                        let question = questions[currentQuestionIndex]
+                        QuizGameplayView(
+                            question: question,
+                            questionNumber: currentQuestionIndex + 1,
+                            totalQuestions: questions.count,
+                            score: score,
+                            streak: streak,
+                            highScore: highScore,
+                            selectedAnswerIndex: selectedAnswerIndex,
+                            hasAnswered: hasAnswered,
+                            streakAnimationScale: $streakAnimationScale,
+                            onAnswerSelected: { index, answerText in
+                                selectAnswer(index: index, correctOption: question.correctAnswer, answerText: answerText)
+                            }
+                        )
+                        .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+                    }
+                case .failure(let errorMessage):
+                    VStack(spacing: 20) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.system(size: 60))
+                            .foregroundColor(.purple)
+                        Text("Connection Failed")
+                            .font(.title2.bold())
+                            .foregroundColor(.white)
+                        Text(errorMessage)
+                            .font(.body)
+                            .foregroundColor(.white.opacity(0.7))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 40)
+                        
+                        Button(action: {
+                            fetchQuestions()
+                        }) {
+                            Text("Try Again")
+                                .font(.headline.bold())
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 30)
+                                .padding(.vertical, 12)
+                                .background(Color.purple)
+                                .cornerRadius(25)
+                        }
+                    }
+                    .padding()
+                    .background(Color.white.opacity(0.1))
+                    .cornerRadius(20)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                    )
+                    .padding(.horizontal, 20)
+                }
+            }
+        }
+        .navigationTitle("Quiz Rush")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+    
+    func fetchQuestions() {
+        loadState = .loading
+        guard let url = URL(string: "https://opentdb.com/api.php?amount=10&type=multiple") else {
+            loadState = .failure("Invalid URL")
+            return
+        }
+        
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let error = error {
+                DispatchQueue.main.async {
+                    self.loadState = .failure(error.localizedDescription)
+                }
+                return
+            }
+            
+            guard let data = data else {
+                DispatchQueue.main.async {
+                    self.loadState = .failure("No data received")
+                }
+                return
+            }
+            
+            DispatchQueue.main.async {
+                do {
+                    let decodedResponse = try JSONDecoder().decode(TriviaResponse.self, from: data)
+                    if decodedResponse.responseCode == 0 {
+                        let questions = decodedResponse.results.map { raw in
+                            let cleanQuestion = raw.question.htmlDecoded
+                            let cleanCorrect = raw.correctAnswer.htmlDecoded
+                            var cleanIncorrect = raw.incorrectAnswers.map { $0.htmlDecoded }
+                            
+                            cleanIncorrect.append(cleanCorrect)
+                            let shuffled = cleanIncorrect.shuffled()
+                            
+                            return QuizQuestion(
+                                category: raw.category.htmlDecoded,
+                                question: cleanQuestion,
+                                correctAnswer: cleanCorrect,
+                                allAnswers: shuffled
+                            )
+                        }
+                        
+                        if questions.count == 10 {
+                            self.loadState = .success(questions)
+                        } else {
+                            self.loadState = .failure("Received \(questions.count) questions instead of 10")
+                        }
+                    } else {
+                        self.loadState = .failure("Server returned error code: \(decodedResponse.responseCode)")
+                    }
+                } catch {
+                    self.loadState = .failure("Decoding error: \(error.localizedDescription)")
+                }
+            }
+        }.resume()
+    }
+    
+    func selectAnswer(index: Int, correctOption: String, answerText: String) {
+        guard !hasAnswered && !isAdvancing else { return }
+        
+        selectedAnswerIndex = index
+        hasAnswered = true
+        isAdvancing = true
+        
+        if answerText == correctOption {
+            streak += 1
+            maxStreak = max(maxStreak, streak)
+            let bonus = streak >= 3 ? 5 : 0
+            score += 10 + bonus
+        } else {
+            streak = 0
+            score = max(0, score - 2)
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+            advanceQuestion()
+        }
+    }
+    
+    func advanceQuestion() {
+        if currentQuestionIndex < 9 {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                selectedAnswerIndex = nil
+                hasAnswered = false
+                isAdvancing = false
+                currentQuestionIndex += 1
+            }
+        } else {
+            if score > highScore {
+                highScore = score
+            }
+            withAnimation(.easeInOut(duration: 0.3)) {
+                isGameOver = true
+            }
+        }
+    }
+    
+    func resetGame() {
+        currentQuestionIndex = 0
+        score = 0
+        streak = 0
+        maxStreak = 0
+        selectedAnswerIndex = nil
+        hasAnswered = false
+        isAdvancing = false
+        isGameOver = false
+        fetchQuestions()
+    }
+}
+
+// MARK: - Quiz Gameplay Screen
+struct QuizGameplayView: View {
+    let question: QuizQuestion
+    let questionNumber: Int
+    let totalQuestions: Int
+    let score: Int
+    let streak: Int
+    let highScore: Int
+    let selectedAnswerIndex: Int?
+    let hasAnswered: Bool
+    @Binding var streakAnimationScale: CGFloat
+    let onAnswerSelected: (Int, String) -> Void
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Score: \(score)")
+                        .font(.title2.bold())
+                        .foregroundColor(.white)
+                    Text("Best: \(highScore)")
+                        .font(.subheadline)
+                        .foregroundColor(.white.opacity(0.6))
+                }
+                Spacer()
+                
+                if streak > 0 {
+                    HStack(spacing: 4) {
+                        Text("Streak: \(streak) 🔥")
+                            .font(.headline.bold())
+                            .foregroundColor(.orange)
+                        if streak >= 3 {
+                            Text("+5 Bonus!")
+                                .font(.caption.bold())
+                                .foregroundColor(.yellow)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.orange.opacity(0.3))
+                                .cornerRadius(8)
+                        }
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.white.opacity(0.1))
+                    .cornerRadius(12)
+                    .scaleEffect(streakAnimationScale)
+                    .onChange(of: streak) { newValue in
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.5, blendDuration: 0)) {
+                            streakAnimationScale = 1.3
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            withAnimation(.spring()) {
+                                streakAnimationScale = 1.0
+                            }
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 10)
+            
+            ProgressView(value: Double(questionNumber), total: Double(totalQuestions))
+                .tint(.purple)
+                .background(Color.white.opacity(0.2))
+                .scaleEffect(x: 1, y: 1.5, anchor: .center)
+                .cornerRadius(4)
+                .padding(.horizontal, 20)
+            
+            Text("Question \(questionNumber) of \(totalQuestions)")
+                .font(.subheadline.bold())
+                .foregroundColor(.white.opacity(0.7))
+            
+            VStack(alignment: .leading, spacing: 12) {
+                Text(question.category.uppercased())
+                    .font(.caption.bold())
+                    .foregroundColor(.purple)
+                    .tracking(2)
+                
+                Text(question.question)
+                    .font(.title3.bold())
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(24)
+            .background(.ultraThinMaterial)
+            .cornerRadius(20)
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(Color.white.opacity(0.25), lineWidth: 1)
+            )
+            .shadow(color: .purple.opacity(0.2), radius: 10, x: 0, y: 5)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 10)
+            
+            VStack(spacing: 12) {
+                ForEach(0..<question.allAnswers.count, id: \.self) { index in
+                    let answerText = question.allAnswers[index]
+                    
+                    QuizOptionButton(
+                        text: answerText,
+                        isSelected: selectedAnswerIndex == index,
+                        isCorrect: answerText == question.correctAnswer,
+                        hasAnswered: hasAnswered,
+                        action: {
+                            onAnswerSelected(index, answerText)
+                        }
+                    )
+                }
+            }
+            .padding(.horizontal, 20)
+            
+            Spacer()
+        }
+    }
+}
+
+// MARK: - Option Button
+struct QuizOptionButton: View {
+    let text: String
+    let isSelected: Bool
+    let isCorrect: Bool
+    let hasAnswered: Bool
+    let action: () -> Void
+    
+    private var backgroundColor: Color {
+        if hasAnswered {
+            if isCorrect {
+                return Color.green.opacity(0.25)
+            } else if isSelected {
+                return Color.red.opacity(0.25)
+            } else {
+                return Color.white.opacity(0.05)
+            }
+        } else {
+            return Color.white.opacity(0.12)
+        }
+    }
+    
+    private var strokeColor: Color {
+        if hasAnswered {
+            if isCorrect {
+                return Color.green
+            } else if isSelected {
+                return Color.red
+            } else {
+                return Color.white.opacity(0.1)
+            }
+        } else {
+            return Color.white.opacity(0.2)
+        }
+    }
+    
+    private var shadowColor: Color {
+        if hasAnswered {
+            if isCorrect {
+                return Color.green.opacity(0.3)
+            } else if isSelected {
+                return Color.red.opacity(0.3)
+            }
+        }
+        return Color.clear
+    }
+    
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Text(text)
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.leading)
+                
+                Spacer()
+                
+                if hasAnswered {
+                    if isCorrect {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .font(.title2)
+                    } else if isSelected {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.red)
+                            .font(.title2)
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .frame(maxWidth: .infinity)
+            .background(backgroundColor)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(strokeColor, lineWidth: 2)
+            )
+            .shadow(color: shadowColor, radius: 8, x: 0, y: 0)
+        }
+        .disabled(hasAnswered)
+        .opacity(hasAnswered && !isCorrect && !isSelected ? 0.5 : 1.0)
+        .animation(.easeInOut(duration: 0.25), value: hasAnswered)
+    }
+}
+
+// MARK: - Game Over Screen
+struct QuizGameOverView: View {
+    let score: Int
+    let maxStreak: Int
+    let highScore: Int
+    let onReplay: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 30) {
+            Image(systemName: "crown.fill")
+                .font(.system(size: 80))
+                .foregroundColor(.yellow)
+                .shadow(color: .yellow.opacity(0.4), radius: 15, x: 0, y: 5)
+            
+            Text("Quiz Finished!")
+                .font(.largeTitle.bold())
+                .foregroundColor(.white)
+            
+            VStack(spacing: 16) {
+                HStack {
+                    Text("Round Score")
+                        .foregroundColor(.white.opacity(0.7))
+                    Spacer()
+                    Text("\(score)")
+                        .font(.title2.bold())
+                        .foregroundColor(.white)
+                }
+                
+                Divider().background(Color.white.opacity(0.2))
+                
+                HStack {
+                    Text("Max Streak")
+                        .foregroundColor(.white.opacity(0.7))
+                    Spacer()
+                    Text("\(maxStreak) 🔥")
+                        .font(.title3.bold())
+                        .foregroundColor(.orange)
+                }
+                
+                Divider().background(Color.white.opacity(0.2))
+                
+                HStack {
+                    Text("Personal Best")
+                        .foregroundColor(.white.opacity(0.7))
+                    Spacer()
+                    Text("\(highScore)")
+                        .font(.title2.bold())
+                        .foregroundColor(.purple)
+                }
+            }
+            .padding(24)
+            .background(.ultraThinMaterial)
+            .cornerRadius(20)
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(Color.white.opacity(0.25), lineWidth: 1)
+            )
+            .padding(.horizontal, 30)
+            
+            Button(action: onReplay) {
+                HStack(spacing: 10) {
+                    Image(systemName: "arrow.clockwise")
+                    Text("Play Again")
+                }
+                .font(.title3.bold())
+                .foregroundColor(.white)
+                .padding(.horizontal, 40)
+                .padding(.vertical, 15)
+                .background(Color.purple)
+                .cornerRadius(30)
+                .shadow(color: .purple.opacity(0.4), radius: 10, x: 0, y: 5)
+            }
+        }
+        .padding(.vertical, 40)
     }
 }
 
