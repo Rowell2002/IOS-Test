@@ -8,11 +8,21 @@ class QuizRushViewModel: ObservableObject {
         }
     }
     
+    @Published var playerName: String = UserDefaults.standard.string(forKey: "savedPlayerName") ?? "Guest" {
+        didSet {
+            UserDefaults.standard.set(playerName, forKey: "savedPlayerName")
+        }
+    }
+    
     @Published var loadState: GameLoadState = .idle
     @Published var currentQuestionIndex = 0
     @Published var score = 0
     @Published var streak = 0
     @Published var maxStreak = 0
+    
+    func loadPlayerName() {
+        playerName = UserDefaults.standard.string(forKey: "savedPlayerName") ?? "Guest"
+    }
     @Published var selectedAnswerIndex: Int? = nil
     @Published var hasAnswered = false
     @Published var isGameOver = false
@@ -109,7 +119,8 @@ class QuizRushViewModel: ObservableObject {
             if score > highScore {
                 highScore = score
             }
-            ScoreHistoryManager.saveScore(score, for: "quizRushHistory")
+            let name = self.playerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Guest" : self.playerName
+            ScoreHistoryManager.saveScore(score, playerName: name, for: "quizRushHistory")
             withAnimation(.easeInOut(duration: 0.3)) {
                 isGameOver = true
             }

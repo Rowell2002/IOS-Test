@@ -7,12 +7,21 @@ class TapFrenzyViewModel: ObservableObject {
             UserDefaults.standard.set(highScore, forKey: "panicHighScore")
         }
     }
+    @Published var playerName: String = UserDefaults.standard.string(forKey: "savedPlayerName") ?? "Guest" {
+        didSet {
+            UserDefaults.standard.set(playerName, forKey: "savedPlayerName")
+        }
+    }
     
     @Published var pressCount = 0
     @Published var timeLeft = 10
     @Published var timerStarted = false
     
     private var timerSubscription: AnyCancellable?
+    
+    func loadPlayerName() {
+        playerName = UserDefaults.standard.string(forKey: "savedPlayerName") ?? "Guest"
+    }
     
     func buttonPressed() {
         if !timerStarted {
@@ -34,7 +43,8 @@ class TapFrenzyViewModel: ObservableObject {
                         if self.pressCount > self.highScore {
                             self.highScore = self.pressCount
                         }
-                        ScoreHistoryManager.saveScore(self.pressCount, for: "tapFrenzyHistory")
+                        let name = self.playerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Guest" : self.playerName
+                        ScoreHistoryManager.saveScore(self.pressCount, playerName: name, for: "tapFrenzyHistory")
                     }
                 }
             }

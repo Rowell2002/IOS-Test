@@ -45,6 +45,23 @@ struct TapFrenzyGameView: View {
                         )
                         .padding(.horizontal, 20)
                         
+                        // Player Name Input
+                        HStack(spacing: 12) {
+                            Image(systemName: "person.fill")
+                                .foregroundColor(.red)
+                            TextField("", text: $viewModel.playerName, prompt: Text("Enter Player Name").foregroundColor(.white.opacity(0.4)))
+                                .foregroundColor(.white)
+                                .font(.headline)
+                        }
+                        .padding()
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        )
+                        .padding(.horizontal, 30)
+                        
                         // Personal Best
                         VStack(spacing: 4) {
                             Text("Personal Best")
@@ -159,6 +176,9 @@ struct TapFrenzyGameView: View {
         }
         .onDisappear {
             viewModel.cancelTimer()
+        }
+        .onAppear {
+            viewModel.loadPlayerName()
         }
     }
 }

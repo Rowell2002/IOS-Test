@@ -8,10 +8,20 @@ class LightItUpViewModel: ObservableObject {
         }
     }
     
+    @Published var playerName: String = UserDefaults.standard.string(forKey: "savedPlayerName") ?? "Guest" {
+        didSet {
+            UserDefaults.standard.set(playerName, forKey: "savedPlayerName")
+        }
+    }
+    
     @Published var currentScore = 0
     @Published var timeLeft = 60
     @Published var level = 1
     @Published var lives = 3
+    
+    func loadPlayerName() {
+        playerName = UserDefaults.standard.string(forKey: "savedPlayerName") ?? "Guest"
+    }
     @Published var showLevelUp = false
     @Published var activeIndices: Set<Int> = []
     @Published var isActive = false
@@ -169,7 +179,8 @@ class LightItUpViewModel: ObservableObject {
         if currentScore > highScore {
             highScore = currentScore
         }
-        ScoreHistoryManager.saveScore(currentScore, for: "lightItUpHistory")
+        let name = self.playerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Guest" : self.playerName
+        ScoreHistoryManager.saveScore(currentScore, playerName: name, for: "lightItUpHistory")
     }
     
     func cleanUp() {

@@ -38,12 +38,24 @@ struct ScoreHistorySheet: View {
                         .padding(.vertical, 80)
                     } else {
                         List {
-                            ForEach(history) { entry in
+                            ForEach(history.sorted(by: {
+                                if $0.score != $1.score {
+                                    return $0.score > $1.score
+                                }
+                                return $0.date > $1.date
+                            })) { entry in
                                 HStack {
                                     VStack(alignment: .leading, spacing: 4) {
-                                        Text("Score: \(entry.score)")
-                                            .font(.headline)
-                                            .foregroundColor(.white)
+                                        HStack(spacing: 6) {
+                                            Text(entry.playerName ?? "Guest")
+                                                .font(.headline)
+                                                .foregroundColor(.white)
+                                            Text("—")
+                                                .foregroundColor(.white.opacity(0.4))
+                                            Text("Score: \(entry.score)")
+                                                .font(.headline)
+                                                .foregroundColor(themeColor)
+                                        }
                                         Text(dateFormatter.string(from: entry.date))
                                             .font(.caption)
                                             .foregroundColor(.white.opacity(0.6))

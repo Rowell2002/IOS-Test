@@ -4,11 +4,13 @@ struct ScoreEntry: Codable, Identifiable {
     let id: UUID
     let score: Int
     let date: Date
+    let playerName: String?
     
-    init(id: UUID = UUID(), score: Int, date: Date = Date()) {
+    init(id: UUID = UUID(), score: Int, date: Date = Date(), playerName: String = "Guest") {
         self.id = id
         self.score = score
         self.date = date
+        self.playerName = playerName
     }
 }
 
@@ -21,9 +23,9 @@ struct ScoreHistoryManager {
         return history
     }
     
-    static func saveScore(_ score: Int, for gameKey: String) {
+    static func saveScore(_ score: Int, playerName: String, for gameKey: String) {
         var history = getHistory(for: gameKey)
-        let entry = ScoreEntry(score: score, date: Date())
+        let entry = ScoreEntry(score: score, date: Date(), playerName: playerName)
         history.insert(entry, at: 0)
         
         // Limit to last 20 entries
