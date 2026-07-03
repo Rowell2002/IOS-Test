@@ -46,9 +46,16 @@ struct ScoreHistorySheet: View {
                             })) { entry in
                                 HStack {
                                     VStack(alignment: .leading, spacing: 4) {
-                                        Text("Score: \(entry.score)")
-                                            .font(.headline)
-                                            .foregroundColor(.white)
+                                        HStack(spacing: 6) {
+                                            Text(entry.playerName ?? "Guest")
+                                                .font(.headline)
+                                                .foregroundColor(.white)
+                                            Text("—")
+                                                .foregroundColor(.white.opacity(0.4))
+                                            Text("Score: \(entry.score)")
+                                                .font(.headline)
+                                                .foregroundColor(themeColor)
+                                        }
                                         Text(dateFormatter.string(from: entry.date))
                                             .font(.caption)
                                             .foregroundColor(.white.opacity(0.6))
