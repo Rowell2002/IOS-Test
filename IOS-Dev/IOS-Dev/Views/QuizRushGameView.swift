@@ -1,0 +1,368 @@
+import SwiftUI
+
+struct QuizRushGameView: View {
+    @StateObject private var viewModel = QuizRushViewModel()
+    @State private var streakAnimationScale: CGFloat = 1.0
+    
+    var body: some View {
+        ZStack {
+            LinearGradient(colors: [.black, .purple.opacity(0.75)], startPoint: .topLeading, endPoint: .bottomTrailing)
+                .ignoresSafeArea()
+            
+            VStack {
+                switch viewModel.loadState {
+                case .idle:
+                    Color.clear.onAppear {
+                        viewModel.fetchQuestions()
+                    }
+                case .loading:
+                    VStack(spacing: 20) {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .purple))
+                            .scaleEffect(2)
+                        Text("Loading Questions...")
+                            .font(.headline)
+                            .foregroundColor(.white.opacity(0.8))
+                    }
+                case .success(let questions):
+                    if viewModel.isGameOver {
+                        QuizGameOverView(score: viewModel.score, maxStreak: viewModel.maxStreak, highScore: viewModel.highScore) {
+                            viewModel.resetGame()
+                        }
+                    } else {
+                        let question = questions[viewModel.currentQuestionIndex]
+                        QuizGameplayView(
+                            question: question,
+                            questionNumber: viewModel.currentQuestionIndex + 1,
+                            totalQuestions: questions.count,
+                            score: viewModel.score,
+                            streak: viewModel.streak,
+                            highScore: viewModel.highScore,
+                            selectedAnswerIndex: viewModel.selectedAnswerIndex,
+                            hasAnswered: viewModel.hasAnswered,
+                            streakAnimationScale: $streakAnimationScale,
+                            onAnswerSelected: { index, answerText in
+                                viewModel.selectAnswer(index: index, correctOption: question.correctAnswer, answerText: answerText)
+                            }
+                        )
+                        .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+                    }
+                case .failure(let errorMessage):
+                    VStack(spacing: 20) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.system(size: 60))
+                            .foregroundColor(.purple)
+                        Text("Connection Failed")
+                            .font(.title2.bold())
+                            .foregroundColor(.white)
+                        Text(errorMessage)
+                            .font(.body)
+                            .foregroundColor(.white.opacity(0.7))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 40)
+                        
+                        Button(action: {
+                            viewModel.fetchQuestions()
+                        }) {
+                            Text("Try Again")
+                                .font(.headline.bold())
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 30)
+                                .padding(.vertical, 12)
+                                .background(Color.purple)
+                                .cornerRadius(25)
+                        }
+                    }
+                    .padding()
+                    .background(Color.white.opacity(0.1))
+                    .cornerRadius(20)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                    )
+                    .padding(.horizontal, 20)
+                }
+            }
+        }
+        .navigationTitle("Quiz Rush")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+struct QuizGameplayView: View {
+    let question: QuizQuestion
+    let questionNumber: Int
+    let totalQuestions: Int
+    let score: Int
+    let streak: Int
+    let highScore: Int
+    let selectedAnswerIndex: Int?
+    let hasAnswered: Bool
+    @Binding var streakAnimationScale: CGFloat
+    let onAnswerSelected: (Int, String) -> Void
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Score: \(score)")
+                        .font(.title2.bold())
+                        .foregroundColor(.white)
+                    Text("Best: \(highScore)")
+                        .font(.subheadline)
+                        .foregroundColor(.white.opacity(0.6))
+                }
+                Spacer()
+                
+                if streak > 0 {
+                    HStack(spacing: 4) {
+                        Text("Streak: \(streak) 🔥")
+                            .font(.headline.bold())
+                            .foregroundColor(.orange)
+                        if streak >= 3 {
+                            Text("+5 Bonus!")
+                                .font(.caption.bold())
+                                .foregroundColor(.yellow)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.orange.opacity(0.3))
+                                .cornerRadius(8)
+                        }
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(Color.white.opacity(0.1))
+                    .cornerRadius(12)
+                    .scaleEffect(streakAnimationScale)
+                    .onChange(of: streak) { _, _ in
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.5, blendDuration: 0)) {
+                            streakAnimationScale = 1.3
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            withAnimation(.spring()) {
+                                streakAnimationScale = 1.0
+                            }
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 10)
+            
+            ProgressView(value: Double(questionNumber), total: Double(totalQuestions))
+                .tint(.purple)
+                .background(Color.white.opacity(0.2))
+                .scaleEffect(x: 1, y: 1.5, anchor: .center)
+                .cornerRadius(4)
+                .padding(.horizontal, 20)
+            
+            Text("Question \(questionNumber) of \(totalQuestions)")
+                .font(.subheadline.bold())
+                .foregroundColor(.white.opacity(0.7))
+            
+            VStack(alignment: .leading, spacing: 12) {
+                Text(question.category.uppercased())
+                    .font(.caption.bold())
+                    .foregroundColor(.purple)
+                    .tracking(2)
+                
+                Text(question.question)
+                    .font(.title3.bold())
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(24)
+            .background(.ultraThinMaterial)
+            .cornerRadius(20)
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(Color.white.opacity(0.25), lineWidth: 1)
+            )
+            .shadow(color: .purple.opacity(0.2), radius: 10, x: 0, y: 5)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 10)
+            
+            VStack(spacing: 12) {
+                ForEach(0..<question.allAnswers.count, id: \.self) { index in
+                    let answerText = question.allAnswers[index]
+                    
+                    QuizOptionButton(
+                        text: answerText,
+                        isSelected: selectedAnswerIndex == index,
+                        isCorrect: answerText == question.correctAnswer,
+                        hasAnswered: hasAnswered,
+                        action: {
+                            onAnswerSelected(index, answerText)
+                        }
+                    )
+                }
+            }
+            .padding(.horizontal, 20)
+            
+            Spacer()
+        }
+    }
+}
+
+struct QuizOptionButton: View {
+    let text: String
+    let isSelected: Bool
+    let isCorrect: Bool
+    let hasAnswered: Bool
+    let action: () -> Void
+    
+    private var backgroundColor: Color {
+        if hasAnswered {
+            if isCorrect {
+                return Color.green.opacity(0.25)
+            } else if isSelected {
+                return Color.red.opacity(0.25)
+            } else {
+                return Color.white.opacity(0.05)
+            }
+        } else {
+            return Color.white.opacity(0.12)
+        }
+    }
+    
+    private var strokeColor: Color {
+        if hasAnswered {
+            if isCorrect {
+                return Color.green
+            } else if isSelected {
+                return Color.red
+            } else {
+                return Color.white.opacity(0.1)
+            }
+        } else {
+            return Color.white.opacity(0.2)
+        }
+    }
+    
+    private var shadowColor: Color {
+        if hasAnswered {
+            if isCorrect {
+                return Color.green.opacity(0.3)
+            } else if isSelected {
+                return Color.red.opacity(0.3)
+            }
+        }
+        return Color.clear
+    }
+    
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Text(text)
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.leading)
+                
+                Spacer()
+                
+                if hasAnswered {
+                    if isCorrect {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .font(.title2)
+                    } else if isSelected {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.red)
+                            .font(.title2)
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .frame(maxWidth: .infinity)
+            .background(backgroundColor)
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(strokeColor, lineWidth: 2)
+            )
+            .shadow(color: shadowColor, radius: 8, x: 0, y: 0)
+        }
+        .disabled(hasAnswered)
+        .opacity(hasAnswered && !isCorrect && !isSelected ? 0.5 : 1.0)
+        .animation(.easeInOut(duration: 0.25), value: hasAnswered)
+    }
+}
+
+struct QuizGameOverView: View {
+    let score: Int
+    let maxStreak: Int
+    let highScore: Int
+    let onReplay: () -> Void
+    
+    var body: some View {
+        VStack(spacing: 30) {
+            Image(systemName: "crown.fill")
+                .font(.system(size: 80))
+                .foregroundColor(.yellow)
+                .shadow(color: .yellow.opacity(0.4), radius: 15, x: 0, y: 5)
+            
+            Text("Quiz Finished!")
+                .font(.largeTitle.bold())
+                .foregroundColor(.white)
+            
+            VStack(spacing: 16) {
+                HStack {
+                    Text("Round Score")
+                        .foregroundColor(.white.opacity(0.7))
+                    Spacer()
+                    Text("\(score)")
+                        .font(.title2.bold())
+                        .foregroundColor(.white)
+                }
+                
+                Divider().background(Color.white.opacity(0.2))
+                
+                HStack {
+                    Text("Max Streak")
+                        .foregroundColor(.white.opacity(0.7))
+                    Spacer()
+                    Text("\(maxStreak) 🔥")
+                        .font(.title3.bold())
+                        .foregroundColor(.orange)
+                }
+                
+                Divider().background(Color.white.opacity(0.2))
+                
+                HStack {
+                    Text("Personal Best")
+                        .foregroundColor(.white.opacity(0.7))
+                    Spacer()
+                    Text("\(highScore)")
+                        .font(.title2.bold())
+                        .foregroundColor(.purple)
+                }
+            }
+            .padding(24)
+            .background(.ultraThinMaterial)
+            .cornerRadius(20)
+            .overlay(
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(Color.white.opacity(0.25), lineWidth: 1)
+            )
+            .padding(.horizontal, 30)
+            
+            Button(action: onReplay) {
+                HStack(spacing: 10) {
+                    Image(systemName: "arrow.clockwise")
+                    Text("Play Again")
+                }
+                .font(.title3.bold())
+                .foregroundColor(.white)
+                .padding(.horizontal, 40)
+                .padding(.vertical, 15)
+                .background(Color.purple)
+                .cornerRadius(30)
+                .shadow(color: .purple.opacity(0.4), radius: 10, x: 0, y: 5)
+            }
+        }
+        .padding(.vertical, 40)
+    }
+}
