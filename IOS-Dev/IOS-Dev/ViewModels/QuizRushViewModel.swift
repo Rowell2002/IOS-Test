@@ -109,6 +109,7 @@ class QuizRushViewModel: ObservableObject {
             if score > highScore {
                 highScore = score
             }
+            ScoreHistoryManager.saveScore(score, for: "quizRushHistory")
             withAnimation(.easeInOut(duration: 0.3)) {
                 isGameOver = true
             }

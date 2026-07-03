@@ -34,6 +34,7 @@ class TapFrenzyViewModel: ObservableObject {
                         if self.pressCount > self.highScore {
                             self.highScore = self.pressCount
                         }
+                        ScoreHistoryManager.saveScore(self.pressCount, for: "tapFrenzyHistory")
                     }
                 }
             }

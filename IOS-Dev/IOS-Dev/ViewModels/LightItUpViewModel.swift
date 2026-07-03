@@ -169,6 +169,7 @@ class LightItUpViewModel: ObservableObject {
         if currentScore > highScore {
             highScore = currentScore
         }
+        ScoreHistoryManager.saveScore(currentScore, for: "lightItUpHistory")
     }
     
     func cleanUp() {

@@ -3,6 +3,8 @@ import SwiftUI
 struct QuizRushGameView: View {
     @StateObject private var viewModel = QuizRushViewModel()
     @State private var streakAnimationScale: CGFloat = 1.0
+    @State private var isGameStarted = false
+    @State private var showHistory = false
     
     var body: some View {
         ZStack {
@@ -10,82 +12,191 @@ struct QuizRushGameView: View {
                 .ignoresSafeArea()
             
             VStack {
-                switch viewModel.loadState {
-                case .idle:
-                    Color.clear.onAppear {
-                        viewModel.fetchQuestions()
-                    }
-                case .loading:
-                    VStack(spacing: 20) {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .purple))
-                            .scaleEffect(2)
-                        Text("Loading Questions...")
-                            .font(.headline)
-                            .foregroundColor(.white.opacity(0.8))
-                    }
-                case .success(let questions):
-                    if viewModel.isGameOver {
-                        QuizGameOverView(score: viewModel.score, maxStreak: viewModel.maxStreak, highScore: viewModel.highScore) {
-                            viewModel.resetGame()
-                        }
-                    } else {
-                        let question = questions[viewModel.currentQuestionIndex]
-                        QuizGameplayView(
-                            question: question,
-                            questionNumber: viewModel.currentQuestionIndex + 1,
-                            totalQuestions: questions.count,
-                            score: viewModel.score,
-                            streak: viewModel.streak,
-                            highScore: viewModel.highScore,
-                            selectedAnswerIndex: viewModel.selectedAnswerIndex,
-                            hasAnswered: viewModel.hasAnswered,
-                            streakAnimationScale: $streakAnimationScale,
-                            onAnswerSelected: { index, answerText in
-                                viewModel.selectAnswer(index: index, correctOption: question.correctAnswer, answerText: answerText)
-                            }
-                        )
-                        .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
-                    }
-                case .failure(let errorMessage):
-                    VStack(spacing: 20) {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .font(.system(size: 60))
+                if !isGameStarted {
+                    // Pre-game Lobby
+                    VStack(spacing: 30) {
+                        Image(systemName: "lightbulb.fill")
+                            .font(.system(size: 80))
                             .foregroundColor(.purple)
-                        Text("Connection Failed")
-                            .font(.title2.bold())
-                            .foregroundColor(.white)
-                        Text(errorMessage)
-                            .font(.body)
-                            .foregroundColor(.white.opacity(0.7))
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 40)
+                            .shadow(color: .purple.opacity(0.4), radius: 15, x: 0, y: 5)
+                            .padding(.top, 40)
                         
-                        Button(action: {
-                            viewModel.fetchQuestions()
-                        }) {
-                            Text("Try Again")
-                                .font(.headline.bold())
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 30)
-                                .padding(.vertical, 12)
-                                .background(Color.purple)
-                                .cornerRadius(25)
+                        Text("Quiz Rush")
+                            .font(.largeTitle.bold())
+                            .foregroundColor(.white)
+                        
+                        // Instruction Card
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("HOW TO PLAY")
+                                .font(.caption.bold())
+                                .foregroundColor(.purple)
+                                .tracking(2)
+                            
+                            Text("1. Answer 10 multiple-choice trivia questions.\n2. Correct answers add points & build a streak.\n3. Incorrect answers apply a small penalty.\n4. Consecutive streaks award bonus points!")
+                                .font(.body)
+                                .foregroundColor(.white.opacity(0.8))
+                                .lineSpacing(6)
                         }
+                        .padding(24)
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(20)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        )
+                        .padding(.horizontal, 20)
+                        
+                        // Personal Best
+                        VStack(spacing: 4) {
+                            Text("Personal Best")
+                                .font(.subheadline)
+                                .foregroundColor(.white.opacity(0.6))
+                            Text("\(viewModel.highScore)")
+                                .font(.title.bold())
+                                .foregroundColor(.white)
+                        }
+                        
+                        Spacer()
+                        
+                        VStack(spacing: 16) {
+                            Button(action: {
+                                isGameStarted = true
+                                viewModel.resetGame()
+                            }) {
+                                Text("Play")
+                                    .font(.title3.bold())
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 16)
+                                    .background(Color.purple)
+                                    .cornerRadius(30)
+                                    .shadow(color: .purple.opacity(0.4), radius: 10, x: 0, y: 5)
+                            }
+                            .padding(.horizontal, 30)
+                            
+                            Button(action: {
+                                showHistory = true
+                            }) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "list.bullet.rectangle")
+                                    Text("Score History")
+                                }
+                                .font(.headline)
+                                .foregroundColor(.white.opacity(0.8))
+                                .padding(.vertical, 12)
+                            }
+                        }
+                        .padding(.bottom, 30)
                     }
-                    .padding()
-                    .background(Color.white.opacity(0.1))
-                    .cornerRadius(20)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                    )
-                    .padding(.horizontal, 20)
+                } else {
+                    // Active Gameplay / Game Over
+                    switch viewModel.loadState {
+                    case .idle:
+                        Color.clear.onAppear {
+                            viewModel.fetchQuestions()
+                        }
+                    case .loading:
+                        VStack(spacing: 20) {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .purple))
+                                .scaleEffect(2)
+                            Text("Loading Questions...")
+                                .font(.headline)
+                                .foregroundColor(.white.opacity(0.8))
+                        }
+                    case .success(let questions):
+                        if viewModel.isGameOver {
+                            QuizGameOverView(
+                                score: viewModel.score,
+                                maxStreak: viewModel.maxStreak,
+                                highScore: viewModel.highScore,
+                                onReplay: {
+                                    viewModel.resetGame()
+                                },
+                                onLobby: {
+                                    isGameStarted = false
+                                }
+                            )
+                        } else {
+                            let question = questions[viewModel.currentQuestionIndex]
+                            QuizGameplayView(
+                                question: question,
+                                questionNumber: viewModel.currentQuestionIndex + 1,
+                                totalQuestions: questions.count,
+                                score: viewModel.score,
+                                streak: viewModel.streak,
+                                highScore: viewModel.highScore,
+                                selectedAnswerIndex: viewModel.selectedAnswerIndex,
+                                hasAnswered: viewModel.hasAnswered,
+                                streakAnimationScale: $streakAnimationScale,
+                                onAnswerSelected: { index, answerText in
+                                    viewModel.selectAnswer(index: index, correctOption: question.correctAnswer, answerText: answerText)
+                                }
+                            )
+                            .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading)))
+                        }
+                    case .failure(let errorMessage):
+                        VStack(spacing: 20) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.system(size: 60))
+                                .foregroundColor(.purple)
+                            Text("Connection Failed")
+                                .font(.title2.bold())
+                                .foregroundColor(.white)
+                            Text(errorMessage)
+                                .font(.body)
+                                .foregroundColor(.white.opacity(0.7))
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 40)
+                            
+                            HStack(spacing: 16) {
+                                Button(action: {
+                                    viewModel.fetchQuestions()
+                                }) {
+                                    Text("Try Again")
+                                        .font(.headline.bold())
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 20)
+                                        .padding(.vertical, 12)
+                                        .background(Color.purple)
+                                        .cornerRadius(25)
+                                }
+                                
+                                Button(action: {
+                                    isGameStarted = false
+                                }) {
+                                    Text("Lobby")
+                                        .font(.headline.bold())
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 20)
+                                        .padding(.vertical, 12)
+                                        .background(Color.white.opacity(0.15))
+                                        .cornerRadius(25)
+                                }
+                            }
+                        }
+                        .padding()
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(20)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        )
+                        .padding(.horizontal, 20)
+                    }
                 }
             }
         }
         .navigationTitle("Quiz Rush")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showHistory) {
+            ScoreHistorySheet(
+                gameTitle: "Quiz Rush",
+                history: ScoreHistoryManager.getHistory(for: "quizRushHistory"),
+                highScore: viewModel.highScore,
+                themeColor: .purple
+            )
+        }
     }
 }
 
@@ -296,6 +407,7 @@ struct QuizGameOverView: View {
     let maxStreak: Int
     let highScore: Int
     let onReplay: () -> Void
+    let onLobby: () -> Void
     
     var body: some View {
         VStack(spacing: 30) {
@@ -349,18 +461,32 @@ struct QuizGameOverView: View {
             )
             .padding(.horizontal, 30)
             
-            Button(action: onReplay) {
-                HStack(spacing: 10) {
-                    Image(systemName: "arrow.clockwise")
-                    Text("Play Again")
+            VStack(spacing: 12) {
+                Button(action: onReplay) {
+                    HStack(spacing: 10) {
+                        Image(systemName: "arrow.clockwise")
+                        Text("Play Again")
+                    }
+                    .font(.headline.bold())
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 15)
+                    .background(Color.purple)
+                    .cornerRadius(30)
+                    .shadow(color: .purple.opacity(0.4), radius: 10, x: 0, y: 5)
                 }
-                .font(.title3.bold())
-                .foregroundColor(.white)
-                .padding(.horizontal, 40)
-                .padding(.vertical, 15)
-                .background(Color.purple)
-                .cornerRadius(30)
-                .shadow(color: .purple.opacity(0.4), radius: 10, x: 0, y: 5)
+                .padding(.horizontal, 30)
+                
+                Button(action: onLobby) {
+                    Text("Back to Lobby")
+                        .font(.headline.bold())
+                        .foregroundColor(.white.opacity(0.8))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.white.opacity(0.15))
+                        .cornerRadius(30)
+                }
+                .padding(.horizontal, 30)
             }
         }
         .padding(.vertical, 40)
