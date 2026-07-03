@@ -38,7 +38,12 @@ struct ScoreHistorySheet: View {
                         .padding(.vertical, 80)
                     } else {
                         List {
-                            ForEach(history) { entry in
+                            ForEach(history.sorted(by: {
+                                if $0.score != $1.score {
+                                    return $0.score > $1.score
+                                }
+                                return $0.date > $1.date
+                            })) { entry in
                                 HStack {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text("Score: \(entry.score)")
