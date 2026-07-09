@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct HomeScreen: View {
+    @State private var hasPlayedDailyChallenge = false
+    
     var body: some View {
         ZStack {
             // Background Layer: Sleek Dark theme
@@ -65,22 +67,28 @@ struct HomeScreen: View {
                     .padding(.horizontal, 24)
                     
                     // Daily Challenge Section
-                    Group {
-                        if DailyChallengeHelper.todayChallengeMode == "Tap Frenzy" {
-                            NavigationLink(destination: TapFrenzyGameView()) {
-                                DailyChallengeBannerContent()
-                            }
-                        } else if DailyChallengeHelper.todayChallengeMode == "Light It Up" {
-                            NavigationLink(destination: LightItUpGameView()) {
-                                DailyChallengeBannerContent()
-                            }
-                        } else {
-                            NavigationLink(destination: QuizRushGameView()) {
-                                DailyChallengeBannerContent()
+                    if !hasPlayedDailyChallenge {
+                        Group {
+                            if DailyChallengeHelper.todayChallengeMode == "Tap Frenzy" {
+                                NavigationLink(destination: TapFrenzyGameView()) {
+                                    DailyChallengeBannerContent()
+                                }
+                            } else if DailyChallengeHelper.todayChallengeMode == "Light It Up" {
+                                NavigationLink(destination: LightItUpGameView()) {
+                                    DailyChallengeBannerContent()
+                                }
+                            } else {
+                                NavigationLink(destination: QuizRushGameView()) {
+                                    DailyChallengeBannerContent()
+                                }
                             }
                         }
+                        .simultaneousGesture(TapGesture().onEnded {
+                            DailyChallengeHelper.markAsPlayedToday()
+                        })
+                        .buttonStyle(PlainButtonStyle())
+                        .transition(.scale.combined(with: .opacity))
                     }
-                    .buttonStyle(PlainButtonStyle())
                     
                     // Game Cards
                     VStack(spacing: 16) {
@@ -120,6 +128,11 @@ struct HomeScreen: View {
             }
         }
         .navigationBarHidden(true)
+        .onAppear {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                hasPlayedDailyChallenge = DailyChallengeHelper.hasPlayedToday
+            }
+        }
     }
 }
 
