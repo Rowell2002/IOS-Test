@@ -45,6 +45,7 @@ class TapFrenzyViewModel: ObservableObject {
                         }
                         let name = self.playerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Guest" : self.playerName
                         ScoreHistoryManager.saveScore(self.pressCount, playerName: name, for: "tapFrenzyHistory")
+                        GameSessionManager.shared.saveSession(gameMode: "Tap Frenzy", score: self.pressCount)
                     }
                 }
             }

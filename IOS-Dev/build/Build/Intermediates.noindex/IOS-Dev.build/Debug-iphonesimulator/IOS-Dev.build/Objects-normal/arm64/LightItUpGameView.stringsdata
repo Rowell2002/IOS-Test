@@ -1,0 +1,160 @@
+{
+  "source": "/Users/chethanarowell/IOS-Test/IOS-Dev/IOS-Dev/Views/LightItUpGameView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Light It Up",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 23
+        }
+      },
+      {
+        "comment": "",
+        "key": "HOW TO PLAY",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 29
+        }
+      },
+      {
+        "comment": "",
+        "key": "1. Tap the highlighted glowing tiles.\n2. Tap incorrect cards, and you lose a life!\n3. Beat the levels before time runs out!",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 34
+        }
+      },
+      {
+        "comment": "",
+        "key": "Enter Player Name",
+        "location": {
+          "startingColumn": 85,
+          "startingLine": 52
+        }
+      },
+      {
+        "comment": "",
+        "key": "",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 52
+        }
+      },
+      {
+        "comment": "",
+        "key": "Personal Best",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 67
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 70
+        }
+      },
+      {
+        "comment": "",
+        "key": "Play",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 81
+        }
+      },
+      {
+        "comment": "",
+        "key": "Score History",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 97
+        }
+      },
+      {
+        "comment": "",
+        "key": "High Score: %lld",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 110
+        }
+      },
+      {
+        "comment": "",
+        "key": "Score: %lld",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 127
+        }
+      },
+      {
+        "comment": "",
+        "key": "Time Left: %llds",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 128
+        }
+      },
+      {
+        "comment": "",
+        "key": "Level: %lld",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 129
+        }
+      },
+      {
+        "comment": "",
+        "key": "Game Over",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 159
+        }
+      },
+      {
+        "comment": "",
+        "key": "You ran out of lives",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 164
+        }
+      },
+      {
+        "comment": "",
+        "key": "Time's up!",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 168
+        }
+      },
+      {
+        "comment": "",
+        "key": "Your Score: %lld",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 173
+        }
+      },
+      {
+        "comment": "",
+        "key": "Replay",
+        "location": {
+          "startingColumn": 44,
+          "startingLine": 178
+        }
+      },
+      {
+        "comment": "",
+        "key": "Lobby",
+        "location": {
+          "startingColumn": 44,
+          "startingLine": 188
+        }
+      }
+    ]
+  },
+  "version": 1
+}

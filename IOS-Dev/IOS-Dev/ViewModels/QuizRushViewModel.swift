@@ -19,14 +19,55 @@ class QuizRushViewModel: ObservableObject {
     @Published var score = 0
     @Published var streak = 0
     @Published var maxStreak = 0
+    @Published var questionTimeLeft = 15
+    
+    private var timerSubscription: AnyCancellable?
     
     func loadPlayerName() {
         playerName = UserDefaults.standard.string(forKey: "savedPlayerName") ?? "Guest"
     }
+    
     @Published var selectedAnswerIndex: Int? = nil
     @Published var hasAnswered = false
     @Published var isGameOver = false
     @Published var isAdvancing = false
+    
+    func startQuestionTimer() {
+        stopQuestionTimer()
+        questionTimeLeft = 15
+        
+        timerSubscription = Timer.publish(every: 1, on: .main, in: .common)
+            .autoconnect()
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                if self.questionTimeLeft > 0 && !self.hasAnswered && !self.isGameOver {
+                    self.questionTimeLeft -= 1
+                    if self.questionTimeLeft == 0 {
+                        self.questionTimeExpired()
+                    }
+                }
+            }
+    }
+    
+    func stopQuestionTimer() {
+        timerSubscription?.cancel()
+        timerSubscription = nil
+    }
+    
+    private func questionTimeExpired() {
+        guard !hasAnswered && !isAdvancing else { return }
+        
+        hasAnswered = true
+        isAdvancing = true
+        streak = 0
+        score = max(0, score - 2)
+        
+        stopQuestionTimer()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            self.advanceQuestion()
+        }
+    }
     
     func fetchQuestions() {
         loadState = .loading
@@ -72,6 +113,7 @@ class QuizRushViewModel: ObservableObject {
                         
                         if questions.count == 10 {
                             self.loadState = .success(questions)
+                            self.startQuestionTimer()
                         } else {
                             self.loadState = .failure("Received \(questions.count) questions instead of 10")
                         }
@@ -87,6 +129,8 @@ class QuizRushViewModel: ObservableObject {
     
     func selectAnswer(index: Int, correctOption: String, answerText: String) {
         guard !hasAnswered && !isAdvancing else { return }
+        
+        stopQuestionTimer()
         
         selectedAnswerIndex = index
         hasAnswered = true
@@ -115,12 +159,15 @@ class QuizRushViewModel: ObservableObject {
                 isAdvancing = false
                 currentQuestionIndex += 1
             }
+            startQuestionTimer()
         } else {
+            stopQuestionTimer()
             if score > highScore {
                 highScore = score
             }
             let name = self.playerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Guest" : self.playerName
             ScoreHistoryManager.saveScore(score, playerName: name, for: "quizRushHistory")
+            GameSessionManager.shared.saveSession(gameMode: "Quiz Rush", score: score)
             withAnimation(.easeInOut(duration: 0.3)) {
                 isGameOver = true
             }
@@ -128,6 +175,7 @@ class QuizRushViewModel: ObservableObject {
     }
     
     func resetGame() {
+        stopQuestionTimer()
         currentQuestionIndex = 0
         score = 0
         streak = 0
@@ -137,5 +185,9 @@ class QuizRushViewModel: ObservableObject {
         isAdvancing = false
         isGameOver = false
         fetchQuestions()
+    }
+    
+    func cleanUp() {
+        stopQuestionTimer()
     }
 }

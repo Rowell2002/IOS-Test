@@ -1,0 +1,23 @@
+{
+  "/Users/chethanarowell/IOS-Test/IOS-Dev/IOS-Dev/ViewModels/QuizRushViewModel.swift" : {
+    "const-values" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/QuizRushViewModel.swiftconstvalues",
+    "dependencies" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/QuizRushViewModel.d",
+    "diagnostics" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/QuizRushViewModel.dia",
+    "object" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/QuizRushViewModel.o",
+    "swift-dependencies" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/QuizRushViewModel.swiftdeps"
+  },
+  "/Users/chethanarowell/IOS-Test/IOS-Dev/IOS-Dev/ViewModels/TapFrenzyViewModel.swift" : {
+    "const-values" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/TapFrenzyViewModel.swiftconstvalues",
+    "dependencies" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/TapFrenzyViewModel.d",
+    "diagnostics" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/TapFrenzyViewModel.dia",
+    "object" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/TapFrenzyViewModel.o",
+    "swift-dependencies" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/TapFrenzyViewModel.swiftdeps"
+  },
+  "/Users/chethanarowell/IOS-Test/IOS-Dev/IOS-Dev/Views/HomeScreen.swift" : {
+    "const-values" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/HomeScreen.swiftconstvalues",
+    "dependencies" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/HomeScreen.d",
+    "diagnostics" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/HomeScreen.dia",
+    "object" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/HomeScreen.o",
+    "swift-dependencies" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/HomeScreen.swiftdeps"
+  }
+}

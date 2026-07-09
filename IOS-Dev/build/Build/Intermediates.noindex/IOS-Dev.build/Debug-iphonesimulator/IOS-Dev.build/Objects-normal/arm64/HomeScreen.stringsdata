@@ -1,0 +1,32 @@
+{
+  "source": "/Users/chethanarowell/IOS-Test/IOS-Dev/IOS-Dev/Views/HomeScreen.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "PlayHub",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 29
+        }
+      },
+      {
+        "comment": "",
+        "key": "Jump In",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 56
+        }
+      },
+      {
+        "comment": "",
+        "key": "Select a mode to start playing.",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 60
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -143,6 +143,7 @@ struct QuizRushGameView: View {
                                 score: viewModel.score,
                                 streak: viewModel.streak,
                                 highScore: viewModel.highScore,
+                                questionTimeLeft: viewModel.questionTimeLeft,
                                 selectedAnswerIndex: viewModel.selectedAnswerIndex,
                                 hasAnswered: viewModel.hasAnswered,
                                 streakAnimationScale: $streakAnimationScale,
@@ -217,6 +218,9 @@ struct QuizRushGameView: View {
         .onAppear {
             viewModel.loadPlayerName()
         }
+        .onDisappear {
+            viewModel.cleanUp()
+        }
     }
 }
 
@@ -227,6 +231,7 @@ struct QuizGameplayView: View {
     let score: Int
     let streak: Int
     let highScore: Int
+    let questionTimeLeft: Int
     let selectedAnswerIndex: Int?
     let hasAnswered: Bool
     @Binding var streakAnimationScale: CGFloat
@@ -290,6 +295,36 @@ struct QuizGameplayView: View {
             Text("Question \(questionNumber) of \(totalQuestions)")
                 .font(.subheadline.bold())
                 .foregroundColor(.white.opacity(0.7))
+            
+            // Countdown timer visual bar
+            VStack(spacing: 6) {
+                HStack {
+                    Image(systemName: "timer")
+                        .foregroundColor(questionTimeLeft <= 5 ? .red : .purple)
+                        .font(.footnote)
+                    
+                    Text("\(questionTimeLeft)s remaining")
+                        .font(.footnote.bold())
+                        .foregroundColor(questionTimeLeft <= 5 ? .red : .white.opacity(0.8))
+                }
+                
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        Capsule()
+                            .fill(Color.white.opacity(0.15))
+                            .frame(height: 6)
+                        
+                        Capsule()
+                            .fill(questionTimeLeft <= 5 ? Color.red : Color.purple)
+                            .frame(width: geo.size.width * CGFloat(Double(questionTimeLeft) / 15.0), height: 6)
+                            .shadow(color: (questionTimeLeft <= 5 ? Color.red : Color.purple).opacity(0.5), radius: 5, x: 0, y: 0)
+                            .animation(.linear(duration: 0.25), value: questionTimeLeft)
+                    }
+                }
+                .frame(height: 6)
+                .padding(.horizontal, 20)
+            }
+            .padding(.horizontal, 20)
             
             VStack(alignment: .leading, spacing: 12) {
                 Text(question.category.uppercased())

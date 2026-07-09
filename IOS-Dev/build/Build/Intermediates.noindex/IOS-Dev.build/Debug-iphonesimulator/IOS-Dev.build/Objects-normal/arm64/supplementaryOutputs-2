@@ -1,0 +1,23 @@
+{
+  "/Users/chethanarowell/IOS-Test/IOS-Dev/IOS-Dev/Models/QuizModels.swift" : {
+    "const-values" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/QuizModels.swiftconstvalues",
+    "dependencies" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/QuizModels.d",
+    "diagnostics" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/QuizModels.dia",
+    "object" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/QuizModels.o",
+    "swift-dependencies" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/QuizModels.swiftdeps"
+  },
+  "/Users/chethanarowell/IOS-Test/IOS-Dev/IOS-Dev/Models/ScoreHistoryManager.swift" : {
+    "const-values" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/ScoreHistoryManager.swiftconstvalues",
+    "dependencies" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/ScoreHistoryManager.d",
+    "diagnostics" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/ScoreHistoryManager.dia",
+    "object" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/ScoreHistoryManager.o",
+    "swift-dependencies" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/ScoreHistoryManager.swiftdeps"
+  },
+  "/Users/chethanarowell/IOS-Test/IOS-Dev/IOS-Dev/ViewModels/LightItUpViewModel.swift" : {
+    "const-values" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/LightItUpViewModel.swiftconstvalues",
+    "dependencies" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/LightItUpViewModel.d",
+    "diagnostics" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/LightItUpViewModel.dia",
+    "object" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/LightItUpViewModel.o",
+    "swift-dependencies" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/LightItUpViewModel.swiftdeps"
+  }
+}
