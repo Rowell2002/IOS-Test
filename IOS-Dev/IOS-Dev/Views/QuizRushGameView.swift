@@ -217,9 +217,11 @@ struct QuizRushGameView: View {
         }
         .onAppear {
             viewModel.loadPlayerName()
+            TabBarManager.shared.isHidden = true
         }
         .onDisappear {
             viewModel.cleanUp()
+            TabBarManager.shared.isHidden = false
         }
     }
 }

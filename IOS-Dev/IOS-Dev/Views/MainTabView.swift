@@ -10,6 +10,8 @@ struct MainTabView: View {
         case settings
     }
     
+    @ObservedObject var tabBarManager = TabBarManager.shared
+    
     var body: some View {
         ZStack(alignment: .bottom) {
             Color.black.ignoresSafeArea()
@@ -40,8 +42,12 @@ struct MainTabView: View {
                 .toolbar(.hidden, for: .tabBar)
             }
             .safeAreaInset(edge: .bottom) {
-                CustomTabBar(selectedTab: $selectedTab)
+                if !tabBarManager.isHidden {
+                    CustomTabBar(selectedTab: $selectedTab)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
+            .animation(.easeInOut(duration: 0.25), value: tabBarManager.isHidden)
         }
         .preferredColorScheme(.dark)
     }

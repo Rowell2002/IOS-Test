@@ -232,6 +232,10 @@ struct LightItUpGameView: View {
         }
         .onAppear {
             viewModel.loadPlayerName()
+            TabBarManager.shared.isHidden = true
+        }
+        .onDisappear {
+            TabBarManager.shared.isHidden = false
         }
     }
 }

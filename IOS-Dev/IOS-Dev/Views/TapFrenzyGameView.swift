@@ -191,9 +191,11 @@ struct TapFrenzyGameView: View {
         }
         .onDisappear {
             viewModel.cancelTimer()
+            TabBarManager.shared.isHidden = false
         }
         .onAppear {
             viewModel.loadPlayerName()
+            TabBarManager.shared.isHidden = true
         }
     }
 }
