@@ -20,6 +20,7 @@ class QuizRushViewModel: ObservableObject {
     @Published var streak = 0
     @Published var maxStreak = 0
     @Published var questionTimeLeft = 15
+    @Published var selectedCategoryID: Int? = nil
     
     private var timerSubscription: AnyCancellable?
     
@@ -71,7 +72,11 @@ class QuizRushViewModel: ObservableObject {
     
     func fetchQuestions() {
         loadState = .loading
-        guard let url = URL(string: "https://opentdb.com/api.php?amount=10&type=multiple") else {
+        var urlString = "https://opentdb.com/api.php?amount=10&type=multiple"
+        if let categoryID = selectedCategoryID {
+            urlString += "&category=\(categoryID)"
+        }
+        guard let url = URL(string: urlString) else {
             loadState = .failure("Invalid URL")
             return
         }
