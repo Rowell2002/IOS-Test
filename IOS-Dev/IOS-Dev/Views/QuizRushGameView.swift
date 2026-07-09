@@ -233,6 +233,7 @@ struct QuizRushGameView: View {
                     }
                 }
             }
+            ConfettiView(isTriggered: $viewModel.isPersonalBestSet)
         }
         .navigationTitle("Quiz Rush")
         .navigationBarTitleDisplayMode(.inline)

@@ -180,6 +180,7 @@ struct TapFrenzyGameView: View {
                     }
                 }
             }
+            ConfettiView(isTriggered: $viewModel.isPersonalBestSet)
         }
         .sheet(isPresented: $showHistory) {
             ScoreHistorySheet(
