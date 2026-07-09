@@ -1,0 +1,23 @@
+{
+  "/Users/chethanarowell/IOS-Test/IOS-Dev/IOS-Dev/Views/LightItUpGameView.swift" : {
+    "const-values" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/LightItUpGameView.swiftconstvalues",
+    "dependencies" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/LightItUpGameView.d",
+    "diagnostics" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/LightItUpGameView.dia",
+    "object" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/LightItUpGameView.o",
+    "swift-dependencies" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/LightItUpGameView.swiftdeps"
+  },
+  "/Users/chethanarowell/IOS-Test/IOS-Dev/IOS-Dev/Views/MainTabView.swift" : {
+    "const-values" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/MainTabView.swiftconstvalues",
+    "dependencies" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/MainTabView.d",
+    "diagnostics" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/MainTabView.dia",
+    "object" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/MainTabView.o",
+    "swift-dependencies" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/MainTabView.swiftdeps"
+  },
+  "/Users/chethanarowell/IOS-Test/IOS-Dev/IOS-Dev/Views/MapView.swift" : {
+    "const-values" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/MapView.swiftconstvalues",
+    "dependencies" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/MapView.d",
+    "diagnostics" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/MapView.dia",
+    "object" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/MapView.o",
+    "swift-dependencies" : "/Users/chethanarowell/IOS-Test/IOS-Dev/build/Build/Intermediates.noindex/IOS-Dev.build/Debug-iphonesimulator/IOS-Dev.build/Objects-normal/arm64/MapView.swiftdeps"
+  }
+}

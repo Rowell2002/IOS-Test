@@ -1,143 +1,204 @@
 import SwiftUI
 
 struct HomeScreen: View {
-    @AppStorage("panicHighScore") private var tapHighScore = 0
-    @AppStorage("tilesHighScore") private var tilesHighScore = 0
-    @AppStorage("quizRushHighScore") private var quizHighScore = 0
-    
     var body: some View {
         ZStack {
-            // Background Layer: Sleek Dark theme with radial color glows
+            // Background Layer: Sleek Dark theme
             Color.black.ignoresSafeArea()
             
-            RadialGradient(colors: [.purple.opacity(0.25), .clear], center: .topTrailing, startRadius: 10, endRadius: 350)
+            // Grid Background
+            GridBackground()
                 .ignoresSafeArea()
             
-            RadialGradient(colors: [.blue.opacity(0.2), .clear], center: .bottomLeading, startRadius: 10, endRadius: 450)
+            // Radial Glows
+            RadialGradient(colors: [.purple.opacity(0.18), .clear], center: .topTrailing, startRadius: 10, endRadius: 350)
+                .ignoresSafeArea()
+            RadialGradient(colors: [.blue.opacity(0.15), .clear], center: .bottomLeading, startRadius: 10, endRadius: 450)
                 .ignoresSafeArea()
             
             ScrollView {
                 VStack(spacing: 28) {
-                    // Header Section
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("GAME ZONE")
-                            .font(.system(size: 13, weight: .bold, design: .rounded))
-                            .foregroundColor(.purple)
-                            .tracking(3)
+                    
+                    // Top Navigation Header Row
+                    HStack {
+                        HStack(spacing: 8) {
+                            Image(systemName: "gamecontroller.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(Color(red: 200/255, green: 160/255, blue: 255/255))
+                            
+                            Text("PlayHub")
+                                .font(.system(size: 26, weight: .black, design: .rounded))
+                                .foregroundColor(Color(red: 200/255, green: 160/255, blue: 255/255))
+                        }
                         
-                        Text("Choose Your Challenge")
-                            .font(.system(size: 32, weight: .bold, design: .rounded))
+                        Spacer()
+                        
+                        // User Avatar
+                        ZStack {
+                            Circle()
+                                .fill(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
+                                .frame(width: 36, height: 36)
+                            
+                            Image(systemName: "person.fill")
+                                .foregroundColor(.white)
+                                .font(.system(size: 16))
+                        }
+                        .overlay(
+                            Circle()
+                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        )
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.top, 16)
+                    
+                    // Header Title
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Jump In")
+                            .font(.system(size: 38, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
+                        
+                        Text("Select a mode to start playing.")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(.white.opacity(0.7))
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 24)
-                    .padding(.top, 24)
                     
-                    // Games Cards Container
-                    VStack(spacing: 20) {
-                        GameCard(
+                    // Game Cards
+                    VStack(spacing: 16) {
+                        GameMenuCard(
                             title: "Tap Frenzy",
-                            description: "Test your tapping speed and mash the button before the 10-second timer runs out!",
-                            iconName: "hand.tap.fill",
-                            highScore: tapHighScore,
-                            themeColor: .red,
+                            subtitle: "Tap fast, beat the clock",
+                            iconName: "gamecontroller.fill",
+                            watermarkName: "gamecontroller",
+                            themeColor: Color(red: 46/255, green: 185/255, blue: 118/255),
+                            iconBgColor: Color(red: 26/255, green: 77/255, blue: 46/255),
                             destination: TapFrenzyGameView()
                         )
                         
-                        GameCard(
+                        GameMenuCard(
                             title: "Light It Up",
-                            description: "A fast-paced grid memory game. Hit the glowing active cards without running out of lives.",
-                            iconName: "squareshape.squareshape.dotted",
-                            highScore: tilesHighScore,
-                            themeColor: .blue,
+                            subtitle: "React before it fades",
+                            iconName: "bolt.fill",
+                            watermarkName: "bolt",
+                            themeColor: Color(red: 100/255, green: 149/255, blue: 237/255),
+                            iconBgColor: Color(red: 35/255, green: 45/255, blue: 65/255),
                             destination: LightItUpGameView()
                         )
                         
-                        GameCard(
+                        GameMenuCard(
                             title: "Quiz Rush",
-                            description: "A trivia race against 10 random questions from the web. Maintain correct streaks for score multipliers!",
-                            iconName: "lightbulb.fill",
-                            highScore: quizHighScore,
-                            themeColor: .purple,
+                            subtitle: "Live trivia showdown",
+                            iconName: "questionmark",
+                            watermarkName: "questionmark",
+                            themeColor: Color(red: 235/255, green: 110/255, blue: 105/255),
+                            iconBgColor: Color(red: 70/255, green: 30/255, blue: 35/255),
                             destination: QuizRushGameView()
                         )
                     }
                     .padding(.horizontal, 20)
                 }
-                .padding(.bottom, 30)
+                .padding(.bottom, 100) // safety space for tab bar
             }
         }
-        .navigationBarHidden(true) // Hides navigation bar title since we build a custom styled header
+        .navigationBarHidden(true)
     }
 }
 
-struct GameCard<Destination: View>: View {
+struct GameMenuCard<Destination: View>: View {
     let title: String
-    let description: String
+    let subtitle: String
     let iconName: String
-    let highScore: Int
+    let watermarkName: String
     let themeColor: Color
+    let iconBgColor: Color
     let destination: Destination
     
     var body: some View {
         NavigationLink(destination: destination) {
-            HStack(spacing: 18) {
-                // Glow Icon Block
-                ZStack {
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(themeColor.opacity(0.15))
-                        .frame(width: 60, height: 60)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(themeColor.opacity(0.35), lineWidth: 1)
-                        )
-                    
-                    Image(systemName: iconName)
-                        .font(.title2)
-                        .foregroundColor(themeColor)
-                        .shadow(color: themeColor.opacity(0.4), radius: 5, x: 0, y: 0)
-                }
+            ZStack(alignment: .trailing) {
+                // Background
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color(red: 18/255, green: 22/255, blue: 32/255))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                    )
                 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
-                        .font(.system(size: 20, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                // Watermark watermark & chevron on the right side
+                HStack(spacing: 4) {
+                    Image(systemName: watermarkName)
+                        .font(.system(size: 80, weight: .bold))
+                        .foregroundColor(themeColor.opacity(0.08))
+                        .scaleEffect(x: -1, y: 1) // Flip watermark to match style
                     
-                    Text(description)
-                        .font(.system(size: 13, weight: .regular))
-                        .foregroundColor(.white.opacity(0.65))
-                        .multilineTextAlignment(.leading)
-                        .lineLimit(2)
-                        .fixedSize(horizontal: false, vertical: true)
-                    
-                    HStack(spacing: 4) {
-                        Image(systemName: "crown.fill")
-                            .font(.system(size: 12))
-                            .foregroundColor(.yellow)
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(themeColor.opacity(0.4))
+                }
+                .padding(.trailing, 24)
+                
+                // Primary card contents
+                HStack(spacing: 16) {
+                    // Icon block
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(iconBgColor)
+                            .frame(width: 50, height: 50)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .stroke(themeColor.opacity(0.3), lineWidth: 1)
+                            )
                         
-                        Text("High Score: \(highScore)")
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(.yellow)
+                        Image(systemName: iconName)
+                            .font(.title3)
+                            .foregroundColor(themeColor)
                     }
-                    .padding(.top, 4)
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(title)
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                        
+                        Text(subtitle)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(themeColor)
+                    }
+                    
+                    Spacer()
                 }
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.35))
+                .padding(.vertical, 20)
+                .padding(.horizontal, 18)
             }
-            .padding(18)
-            .background(.ultraThinMaterial)
-            .cornerRadius(22)
-            .overlay(
-                RoundedRectangle(cornerRadius: 22)
-                    .stroke(Color.white.opacity(0.12), lineWidth: 1)
-            )
-            .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
+            .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
         }
         .buttonStyle(PlainButtonStyle())
+    }
+}
+
+struct GridBackground: View {
+    var body: some View {
+        GeometryReader { geometry in
+            Path { path in
+                let width = geometry.size.width
+                let height = geometry.size.height
+                
+                // Vertical lines
+                let stepX: CGFloat = 36
+                for x in stride(from: 0, to: width, by: stepX) {
+                    path.move(to: CGPoint(x: x, y: 0))
+                    path.addLine(to: CGPoint(x: x, y: height))
+                }
+                
+                // Horizontal lines
+                let stepY: CGFloat = 36
+                for y in stride(from: 0, to: height, by: stepY) {
+                    path.move(to: CGPoint(x: 0, y: y))
+                    path.addLine(to: CGPoint(x: width, y: y))
+                }
+            }
+            .stroke(Color.white.opacity(0.035), lineWidth: 0.8)
+        }
     }
 }
 

@@ -181,6 +181,7 @@ class LightItUpViewModel: ObservableObject {
         }
         let name = self.playerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Guest" : self.playerName
         ScoreHistoryManager.saveScore(currentScore, playerName: name, for: "lightItUpHistory")
+        GameSessionManager.shared.saveSession(gameMode: "Light It Up", score: currentScore)
     }
     
     func cleanUp() {

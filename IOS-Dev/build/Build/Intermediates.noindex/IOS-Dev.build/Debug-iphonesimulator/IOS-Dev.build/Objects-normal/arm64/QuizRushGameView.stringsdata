@@ -1,0 +1,240 @@
+{
+  "source": "/Users/chethanarowell/IOS-Test/IOS-Dev/IOS-Dev/Views/QuizRushGameView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Quiz Rush",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 208
+        }
+      },
+      {
+        "comment": "",
+        "key": "Quiz Rush",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 24
+        }
+      },
+      {
+        "comment": "",
+        "key": "HOW TO PLAY",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 30
+        }
+      },
+      {
+        "comment": "",
+        "key": "1. Answer 10 multiple-choice trivia questions.\n2. Correct answers add points & build a streak.\n3. Incorrect answers apply a small penalty.\n4. Consecutive streaks award bonus points!",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 35
+        }
+      },
+      {
+        "comment": "",
+        "key": "Enter Player Name",
+        "location": {
+          "startingColumn": 85,
+          "startingLine": 53
+        }
+      },
+      {
+        "comment": "",
+        "key": "",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 53
+        }
+      },
+      {
+        "comment": "",
+        "key": "Personal Best",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 68
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 71
+        }
+      },
+      {
+        "comment": "",
+        "key": "Play",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 83
+        }
+      },
+      {
+        "comment": "",
+        "key": "Score History",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 99
+        }
+      },
+      {
+        "comment": "",
+        "key": "Loading Questions...",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 120
+        }
+      },
+      {
+        "comment": "",
+        "key": "Connection Failed",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 161
+        }
+      },
+      {
+        "comment": "",
+        "key": "Try Again",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 174
+        }
+      },
+      {
+        "comment": "",
+        "key": "Lobby",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 186
+        }
+      },
+      {
+        "comment": "",
+        "key": "Question %lld of %lld",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 295
+        }
+      },
+      {
+        "comment": "",
+        "key": "Score: %lld",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 244
+        }
+      },
+      {
+        "comment": "",
+        "key": "Best: %lld",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 247
+        }
+      },
+      {
+        "comment": "",
+        "key": "Streak: %lld 🔥",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 255
+        }
+      },
+      {
+        "comment": "",
+        "key": "+5 Bonus!",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 259
+        }
+      },
+      {
+        "comment": "",
+        "key": "%llds remaining",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 306
+        }
+      },
+      {
+        "comment": "",
+        "key": "Quiz Finished!",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 474
+        }
+      },
+      {
+        "comment": "",
+        "key": "Round Score",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 480
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 483
+        }
+      },
+      {
+        "comment": "",
+        "key": "Max Streak",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 491
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld 🔥",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 494
+        }
+      },
+      {
+        "comment": "",
+        "key": "Personal Best",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 502
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 505
+        }
+      },
+      {
+        "comment": "",
+        "key": "Play Again",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 523
+        }
+      },
+      {
+        "comment": "",
+        "key": "Back to Lobby",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 536
+        }
+      }
+    ]
+  },
+  "version": 1
+}

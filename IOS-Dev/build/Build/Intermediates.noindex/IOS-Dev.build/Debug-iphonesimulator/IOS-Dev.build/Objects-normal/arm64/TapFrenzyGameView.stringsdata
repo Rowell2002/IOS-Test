@@ -1,0 +1,136 @@
+{
+  "source": "/Users/chethanarowell/IOS-Test/IOS-Dev/IOS-Dev/Views/TapFrenzyGameView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Tap Frenzy",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 23
+        }
+      },
+      {
+        "comment": "",
+        "key": "HOW TO PLAY",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 29
+        }
+      },
+      {
+        "comment": "",
+        "key": "1. Tap the giant button as fast as you can.\n2. You have exactly 10 seconds.\n3. Rack up the highest score possible!",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 34
+        }
+      },
+      {
+        "comment": "",
+        "key": "Enter Player Name",
+        "location": {
+          "startingColumn": 85,
+          "startingLine": 52
+        }
+      },
+      {
+        "comment": "",
+        "key": "",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 52
+        }
+      },
+      {
+        "comment": "",
+        "key": "Personal Best",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 67
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 70
+        }
+      },
+      {
+        "comment": "",
+        "key": "Play",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 81
+        }
+      },
+      {
+        "comment": "",
+        "key": "Score History",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 97
+        }
+      },
+      {
+        "comment": "",
+        "key": "High Score: %lld",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 109
+        }
+      },
+      {
+        "comment": "",
+        "key": "Pressed: %lld",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 115
+        }
+      },
+      {
+        "comment": "",
+        "key": "Time left: %lld",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 132
+        }
+      },
+      {
+        "comment": "",
+        "key": "Your pressed count: %lld",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 136
+        }
+      },
+      {
+        "comment": "",
+        "key": "Press",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 123
+        }
+      },
+      {
+        "comment": "",
+        "key": "Replay",
+        "location": {
+          "startingColumn": 40,
+          "startingLine": 142
+        }
+      },
+      {
+        "comment": "",
+        "key": "Lobby",
+        "location": {
+          "startingColumn": 40,
+          "startingLine": 152
+        }
+      }
+    ]
+  },
+  "version": 1
+}
