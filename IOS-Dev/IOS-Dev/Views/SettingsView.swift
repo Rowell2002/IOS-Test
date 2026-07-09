@@ -195,8 +195,8 @@ struct SettingsView: View {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["daily_challenge"])
         
         let content = UNMutableNotificationContent()
-        content.title = "Daily Challenge Time! 🎮"
-        content.body = "Jump back into PlayHub and beat your high score today!"
+        content.title = "Daily Challenge is Ready! 🏆"
+        content.body = "Today's challenge is \(DailyChallengeHelper.todayChallengeMode)! Open PlayHub to play now!"
         content.sound = .default
         
         let calendar = Calendar.current

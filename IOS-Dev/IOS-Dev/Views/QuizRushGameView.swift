@@ -542,6 +542,22 @@ struct QuizGameOverView: View {
                         .cornerRadius(30)
                 }
                 .padding(.horizontal, 30)
+                
+                ShareLink(item: "I just scored \(score) on Quiz Rush — beat that") {
+                    Label("Share Score", systemImage: "square.and.arrow.up")
+                        .font(.headline.bold())
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.purple.opacity(0.2))
+                        .cornerRadius(30)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 30)
+                                .stroke(Color.purple.opacity(0.5), lineWidth: 1)
+                        )
+                }
+                .padding(.horizontal, 30)
+                .padding(.top, 4)
             }
         }
         .padding(.vertical, 40)

@@ -160,6 +160,21 @@ struct TapFrenzyGameView: View {
                                 .background(Color.white.opacity(0.15))
                                 .cornerRadius(20)
                             }
+                            
+                            ShareLink(item: "I just scored \(viewModel.pressCount) on Tap Frenzy — beat that") {
+                                Label("Share Score", systemImage: "square.and.arrow.up")
+                                    .font(.headline.bold())
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 30)
+                                    .padding(.vertical, 12)
+                                    .background(Color.red.opacity(0.2))
+                                    .cornerRadius(20)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 20)
+                                            .stroke(Color.red.opacity(0.5), lineWidth: 1)
+                                    )
+                            }
+                            .padding(.top, 12)
                         }
                         Spacer()
                     }

@@ -196,6 +196,21 @@ struct LightItUpGameView: View {
                                     .foregroundColor(.white)
                                     .cornerRadius(20)
                                 }
+                                
+                                ShareLink(item: "I just scored \(viewModel.currentScore) on Light It Up — beat that") {
+                                    Label("Share Score", systemImage: "square.and.arrow.up")
+                                        .font(.headline.bold())
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 30)
+                                        .padding(.vertical, 12)
+                                        .background(Color.blue.opacity(0.2))
+                                        .cornerRadius(20)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 20)
+                                                .stroke(Color.blue.opacity(0.5), lineWidth: 1)
+                                        )
+                                }
+                                .padding(.top, 12)
                             }
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                         }
