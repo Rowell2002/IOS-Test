@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct HomeScreen: View {
+    @State private var hasPlayedDailyChallenge = false
+    
     var body: some View {
         ZStack {
             // Background Layer: Sleek Dark theme
@@ -64,6 +66,30 @@ struct HomeScreen: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 24)
                     
+                    // Daily Challenge Section
+                    if !hasPlayedDailyChallenge {
+                        Group {
+                            if DailyChallengeHelper.todayChallengeMode == "Tap Frenzy" {
+                                NavigationLink(destination: TapFrenzyGameView()) {
+                                    DailyChallengeBannerContent()
+                                }
+                            } else if DailyChallengeHelper.todayChallengeMode == "Light It Up" {
+                                NavigationLink(destination: LightItUpGameView()) {
+                                    DailyChallengeBannerContent()
+                                }
+                            } else {
+                                NavigationLink(destination: QuizRushGameView()) {
+                                    DailyChallengeBannerContent()
+                                }
+                            }
+                        }
+                        .simultaneousGesture(TapGesture().onEnded {
+                            DailyChallengeHelper.markAsPlayedToday()
+                        })
+                        .buttonStyle(PlainButtonStyle())
+                        .transition(.scale.combined(with: .opacity))
+                    }
+                    
                     // Game Cards
                     VStack(spacing: 16) {
                         GameMenuCard(
@@ -102,6 +128,11 @@ struct HomeScreen: View {
             }
         }
         .navigationBarHidden(true)
+        .onAppear {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                hasPlayedDailyChallenge = DailyChallengeHelper.hasPlayedToday
+            }
+        }
     }
 }
 
@@ -199,6 +230,53 @@ struct GridBackground: View {
             }
             .stroke(Color.white.opacity(0.035), lineWidth: 0.8)
         }
+    }
+}
+
+struct DailyChallengeBannerContent: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Label("DAILY CHALLENGE", systemImage: "trophy.fill")
+                    .font(.system(size: 12, weight: .bold, design: .rounded))
+                    .foregroundColor(.yellow)
+                    .tracking(1.5)
+                
+                Spacer()
+                
+                Text("PLAY NOW")
+                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(Color.yellow.opacity(0.3))
+                    .cornerRadius(6)
+            }
+            
+            Text(DailyChallengeHelper.todayChallengeMode)
+                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .foregroundColor(.white)
+            
+            Text("Complete today's challenge to earn maximum points and keep your streak alive!")
+                .font(.system(size: 13))
+                .foregroundColor(.white.opacity(0.7))
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+        }
+        .padding(20)
+        .background(
+            LinearGradient(colors: [Color(red: 45/255, green: 30/255, blue: 70/255), Color(red: 25/255, green: 20/255, blue: 45/255)], startPoint: .topLeading, endPoint: .bottomTrailing)
+        )
+        .cornerRadius(22)
+        .overlay(
+            RoundedRectangle(cornerRadius: 22)
+                .stroke(
+                    LinearGradient(colors: [.yellow, .purple], startPoint: .topLeading, endPoint: .bottomTrailing).opacity(0.4),
+                    lineWidth: 1.5
+                )
+        )
+        .padding(.horizontal, 20)
+        .shadow(color: .purple.opacity(0.2), radius: 10, x: 0, y: 5)
     }
 }
 
