@@ -20,6 +20,8 @@ class QuizRushViewModel: ObservableObject {
     @Published var streak = 0
     @Published var maxStreak = 0
     @Published var questionTimeLeft = 15
+    @Published var selectedCategoryID: Int? = nil
+    @Published var isPersonalBestSet = false
     
     private var timerSubscription: AnyCancellable?
     
@@ -71,7 +73,11 @@ class QuizRushViewModel: ObservableObject {
     
     func fetchQuestions() {
         loadState = .loading
-        guard let url = URL(string: "https://opentdb.com/api.php?amount=10&type=multiple") else {
+        var urlString = "https://opentdb.com/api.php?amount=10&type=multiple"
+        if let categoryID = selectedCategoryID {
+            urlString += "&category=\(categoryID)"
+        }
+        guard let url = URL(string: urlString) else {
             loadState = .failure("Invalid URL")
             return
         }
@@ -141,9 +147,17 @@ class QuizRushViewModel: ObservableObject {
             maxStreak = max(maxStreak, streak)
             let bonus = streak >= 3 ? 5 : 0
             score += 10 + bonus
+            
+            // Trigger correct feedback
+            HapticManager.shared.impact(style: .light)
+            SoundManager.shared.play(.correct)
         } else {
             streak = 0
             score = max(0, score - 2)
+            
+            // Trigger incorrect feedback
+            HapticManager.shared.notification(type: .error)
+            SoundManager.shared.play(.incorrect)
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
@@ -162,14 +176,29 @@ class QuizRushViewModel: ObservableObject {
             startQuestionTimer()
         } else {
             stopQuestionTimer()
+            
+            var newHigh = false
             if score > highScore {
                 highScore = score
+                isPersonalBestSet = true
+                newHigh = true
             }
+            
             let name = self.playerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Guest" : self.playerName
             ScoreHistoryManager.saveScore(score, playerName: name, for: "quizRushHistory")
             GameSessionManager.shared.saveSession(gameMode: "Quiz Rush", score: score)
+            
             withAnimation(.easeInOut(duration: 0.3)) {
                 isGameOver = true
+            }
+            
+            // Play victory or incorrect final sounds
+            if newHigh {
+                HapticManager.shared.notification(type: .success)
+                SoundManager.shared.play(.victory)
+            } else {
+                HapticManager.shared.notification(type: .warning)
+                SoundManager.shared.play(.incorrect)
             }
         }
     }
@@ -184,6 +213,7 @@ class QuizRushViewModel: ObservableObject {
         hasAnswered = false
         isAdvancing = false
         isGameOver = false
+        isPersonalBestSet = false
         fetchQuestions()
     }
     

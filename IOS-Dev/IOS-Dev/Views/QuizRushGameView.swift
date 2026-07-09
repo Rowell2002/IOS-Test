@@ -63,6 +63,35 @@ struct QuizRushGameView: View {
                         )
                         .padding(.horizontal, 30)
                         
+                        // Category Selection Dropdown
+                        HStack {
+                            Image(systemName: "list.bullet")
+                                .foregroundColor(.purple)
+                            
+                            Text("Genre:")
+                                .foregroundColor(.white.opacity(0.8))
+                                .font(.headline)
+                            
+                            Spacer()
+                            
+                            Picker("Select Genre", selection: $viewModel.selectedCategoryID) {
+                                ForEach(triviaCategories) { category in
+                                    Text(category.name)
+                                        .tag(category.id)
+                                }
+                            }
+                            .tint(.purple)
+                            .pickerStyle(.menu)
+                        }
+                        .padding()
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                        )
+                        .padding(.horizontal, 30)
+                        
                         // Personal Best
                         VStack(spacing: 4) {
                             Text("Personal Best")
@@ -204,6 +233,7 @@ struct QuizRushGameView: View {
                     }
                 }
             }
+            ConfettiView(isTriggered: $viewModel.isPersonalBestSet)
         }
         .navigationTitle("Quiz Rush")
         .navigationBarTitleDisplayMode(.inline)
@@ -565,3 +595,24 @@ struct QuizGameOverView: View {
         .padding(.vertical, 40)
     }
 }
+
+struct TriviaCategory: Identifiable, Hashable {
+    let id: Int?
+    let name: String
+}
+
+let triviaCategories = [
+    TriviaCategory(id: nil, name: "All Genres"),
+    TriviaCategory(id: 9, name: "General Knowledge"),
+    TriviaCategory(id: 11, name: "Film"),
+    TriviaCategory(id: 12, name: "Music"),
+    TriviaCategory(id: 14, name: "Television"),
+    TriviaCategory(id: 15, name: "Video Games"),
+    TriviaCategory(id: 17, name: "Science & Nature"),
+    TriviaCategory(id: 18, name: "Computers"),
+    TriviaCategory(id: 21, name: "Sports"),
+    TriviaCategory(id: 22, name: "Geography"),
+    TriviaCategory(id: 23, name: "History"),
+    TriviaCategory(id: 24, name: "Politics"),
+    TriviaCategory(id: 27, name: "Animals"),
+]

@@ -16,6 +16,7 @@ class TapFrenzyViewModel: ObservableObject {
     @Published var pressCount = 0
     @Published var timeLeft = 10
     @Published var timerStarted = false
+    @Published var isPersonalBestSet = false
     
     private var timerSubscription: AnyCancellable?
     
@@ -28,6 +29,10 @@ class TapFrenzyViewModel: ObservableObject {
             startTimer()
         }
         pressCount += 1
+        
+        // Haptic feedback & Sound effect for tapping
+        HapticManager.shared.impact(style: .light)
+        SoundManager.shared.play(.tap)
     }
     
     private func startTimer() {
@@ -38,14 +43,35 @@ class TapFrenzyViewModel: ObservableObject {
                 guard let self = self else { return }
                 if self.timeLeft > 0 && self.timerStarted {
                     self.timeLeft -= 1
+                    
+                    // Trigger haptic & tick warning sound during last 3 seconds
+                    if self.timeLeft <= 3 && self.timeLeft > 0 {
+                        HapticManager.shared.impact(style: .medium)
+                        SoundManager.shared.play(.incorrect) // Buzz warning tick
+                    }
+                    
                     if self.timeLeft == 0 {
                         self.timerSubscription?.cancel()
+                        
+                        var newHigh = false
                         if self.pressCount > self.highScore {
                             self.highScore = self.pressCount
+                            self.isPersonalBestSet = true
+                            newHigh = true
                         }
+                        
                         let name = self.playerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Guest" : self.playerName
                         ScoreHistoryManager.saveScore(self.pressCount, playerName: name, for: "tapFrenzyHistory")
                         GameSessionManager.shared.saveSession(gameMode: "Tap Frenzy", score: self.pressCount)
+                        
+                        // Play final sound & haptic
+                        if newHigh {
+                            HapticManager.shared.notification(type: .success)
+                            SoundManager.shared.play(.victory)
+                        } else {
+                            HapticManager.shared.notification(type: .warning)
+                            SoundManager.shared.play(.incorrect)
+                        }
                     }
                 }
             }
@@ -56,6 +82,7 @@ class TapFrenzyViewModel: ObservableObject {
         pressCount = 0
         timeLeft = 10
         timerStarted = false
+        isPersonalBestSet = false
     }
     
     func cancelTimer() {

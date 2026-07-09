@@ -213,15 +213,13 @@ struct LightItUpGameView: View {
                                 .padding(.top, 12)
                             }
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        }
-                        Spacer()
                     }
-                    .onDisappear {
-                        viewModel.cleanUp()
-                    }
+                    Spacer()
                 }
             }
         }
+        ConfettiView(isTriggered: $viewModel.isPersonalBestSet)
+    }
         .sheet(isPresented: $showHistory) {
             ScoreHistorySheet(
                 gameTitle: "Light It Up",
@@ -235,6 +233,7 @@ struct LightItUpGameView: View {
             TabBarManager.shared.isHidden = true
         }
         .onDisappear {
+            viewModel.cleanUp()
             TabBarManager.shared.isHidden = false
         }
     }

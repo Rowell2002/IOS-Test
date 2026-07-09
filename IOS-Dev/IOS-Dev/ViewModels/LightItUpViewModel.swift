@@ -18,6 +18,7 @@ class LightItUpViewModel: ObservableObject {
     @Published var timeLeft = 60
     @Published var level = 1
     @Published var lives = 3
+    @Published var isPersonalBestSet = false
     
     func loadPlayerName() {
         playerName = UserDefaults.standard.string(forKey: "savedPlayerName") ?? "Guest"
@@ -66,6 +67,7 @@ class LightItUpViewModel: ObservableObject {
         timerStarted = false
         glowColor = .yellow
         interval = 1.5
+        isPersonalBestSet = false
         
         startTimer()
         nextTurn()
@@ -105,10 +107,19 @@ class LightItUpViewModel: ObservableObject {
         if activeIndices.contains(index) {
             currentScore += 1
             activeIndices.remove(index)
+            
+            // Sound and haptic on successful tile tap
+            HapticManager.shared.impact(style: .light)
+            SoundManager.shared.play(.correct)
+            
             if activeIndices.isEmpty {
                 nextTurn()
             }
         } else {
+            // Sound and haptic on incorrect tile tap
+            HapticManager.shared.notification(type: .error)
+            SoundManager.shared.play(.incorrect)
+            
             loseLife()
         }
     }
@@ -176,12 +187,26 @@ class LightItUpViewModel: ObservableObject {
         activeIndices.removeAll()
         isActive = false
         gameTimerSubscription?.cancel()
+        
+        var newHigh = false
         if currentScore > highScore {
             highScore = currentScore
+            isPersonalBestSet = true
+            newHigh = true
         }
+        
         let name = self.playerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Guest" : self.playerName
         ScoreHistoryManager.saveScore(currentScore, playerName: name, for: "lightItUpHistory")
         GameSessionManager.shared.saveSession(gameMode: "Light It Up", score: currentScore)
+        
+        // Final sound and haptic feedback
+        if newHigh {
+            HapticManager.shared.notification(type: .success)
+            SoundManager.shared.play(.victory)
+        } else {
+            HapticManager.shared.notification(type: .warning)
+            SoundManager.shared.play(.incorrect)
+        }
     }
     
     func cleanUp() {
