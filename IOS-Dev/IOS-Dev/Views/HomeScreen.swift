@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HomeScreen: View {
     @State private var hasPlayedDailyChallenge = false
+    @State private var streak: Int = 0
     
     var body: some View {
         ZStack {
@@ -65,6 +66,13 @@ struct HomeScreen: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 24)
+                    
+                    // Streak Banner
+                    if streak > 0 {
+                        StreakBannerView(streak: streak)
+                            .padding(.horizontal, 20)
+                            .transition(.scale(scale: 0.95).combined(with: .opacity))
+                    }
                     
                     // Daily Challenge Section
                     if !hasPlayedDailyChallenge {
@@ -131,6 +139,7 @@ struct HomeScreen: View {
         .onAppear {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                 hasPlayedDailyChallenge = DailyChallengeHelper.hasPlayedToday
+                streak = DailyChallengeHelper.currentStreak
             }
         }
     }
@@ -277,6 +286,85 @@ struct DailyChallengeBannerContent: View {
         )
         .padding(.horizontal, 20)
         .shadow(color: .purple.opacity(0.2), radius: 10, x: 0, y: 5)
+    }
+}
+
+// MARK: - Streak Banner View
+struct StreakBannerView: View {
+    let streak: Int
+    
+    private var flameColor: Color {
+        switch streak {
+        case 1...2:  return .orange
+        case 3...6:  return Color(red: 1.0, green: 0.45, blue: 0.0)
+        case 7...13: return Color(red: 1.0, green: 0.2, blue: 0.1)
+        default:     return Color(red: 0.9, green: 0.0, blue: 0.4)  // 14+ day legendary
+        }
+    }
+    
+    private var streakLabel: String {
+        switch streak {
+        case 1:        return "First Day!"
+        case 2...6:    return "\(streak)-Day Streak 🔥"
+        case 7...13:   return "\(streak)-Day Streak 🔥🔥"
+        case 14...29:  return "\(streak)-Day Streak 🔥🔥🔥"
+        default:       return "\(streak)-Day Streak 👑"
+        }
+    }
+    
+    var body: some View {
+        HStack(spacing: 14) {
+            // Animated flame icon
+            ZStack {
+                Circle()
+                    .fill(flameColor.opacity(0.15))
+                    .frame(width: 46, height: 46)
+                Image(systemName: "flame.fill")
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundStyle(
+                        LinearGradient(colors: [.yellow, flameColor], startPoint: .top, endPoint: .bottom)
+                    )
+            }
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(streakLabel)
+                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                    .foregroundColor(.white)
+                
+                Text("Keep going! Complete today's challenge to extend your streak.")
+                    .font(.system(size: 12))
+                    .foregroundColor(.white.opacity(0.6))
+                    .lineLimit(1)
+            }
+            
+            Spacer()
+            
+            // Streak count pill
+            Text("\(streak)")
+                .font(.system(size: 22, weight: .black, design: .rounded))
+                .foregroundColor(flameColor)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(flameColor.opacity(0.12))
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(flameColor.opacity(0.3), lineWidth: 1)
+                )
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 18)
+                .fill(Color(red: 18/255, green: 14/255, blue: 10/255))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(
+                            LinearGradient(colors: [flameColor.opacity(0.5), .clear], startPoint: .topLeading, endPoint: .bottomTrailing),
+                            lineWidth: 1.2
+                        )
+                )
+        )
+        .shadow(color: flameColor.opacity(0.15), radius: 8, x: 0, y: 4)
     }
 }
 
