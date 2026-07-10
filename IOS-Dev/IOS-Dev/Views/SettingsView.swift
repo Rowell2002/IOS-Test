@@ -142,6 +142,57 @@ struct SettingsView: View {
                             RoundedRectangle(cornerRadius: 18)
                                 .stroke(Color.white.opacity(0.08), lineWidth: 1)
                         )
+                        
+                        // Account Management Block
+                        VStack(spacing: 16) {
+                            HStack {
+                                Image(systemName: "person.circle.fill")
+                                    .foregroundColor(.purple)
+                                    .font(.headline)
+                                
+                                Text("Account")
+                                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                                    .foregroundColor(.white)
+                                
+                                Spacer()
+                            }
+                            
+                            if let currentUser = AuthManager.shared.currentUser {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(currentUser.fullName)
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundColor(.white)
+                                    Text(currentUser.email)
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.white.opacity(0.5))
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            
+                            Button(action: {
+                                AuthManager.shared.logout()
+                            }) {
+                                Text("Sign Out")
+                                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                                    .foregroundColor(.red)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 14)
+                                    .background(Color.white.opacity(0.04))
+                                    .cornerRadius(14)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 14)
+                                            .stroke(Color.red.opacity(0.3), lineWidth: 1)
+                                    )
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                        .padding()
+                        .background(Color.white.opacity(0.04))
+                        .cornerRadius(18)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18)
+                                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                        )
                     }
                     .padding(.horizontal, 24)
                 }
