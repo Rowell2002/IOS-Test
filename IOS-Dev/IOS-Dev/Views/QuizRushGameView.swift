@@ -92,6 +92,24 @@ struct QuizRushGameView: View {
                         )
                         .padding(.horizontal, 30)
                         
+                        // Difficulty Segmented Control
+                        VStack(spacing: 8) {
+                            Text("DIFFICULTY")
+                                .font(.caption.bold())
+                                .foregroundColor(.purple.opacity(0.8))
+                                .tracking(1)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            
+                            Picker("Difficulty", selection: $viewModel.selectedDifficulty) {
+                                Text("Any").tag("any")
+                                Text("Easy").tag("easy")
+                                Text("Medium").tag("medium")
+                                Text("Hard").tag("hard")
+                            }
+                            .pickerStyle(.segmented)
+                        }
+                        .padding(.horizontal, 30)
+                        
                         // Personal Best
                         VStack(spacing: 4) {
                             Text("Personal Best")

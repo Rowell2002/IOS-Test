@@ -117,16 +117,37 @@ struct TapFrenzyGameView: View {
                                 .foregroundStyle(.white)
                                 .padding(.top, 20)
                             
-                            Button(action: {
-                                viewModel.buttonPressed()
-                            }) {
-                                Text("Press")
-                                    .font(.largeTitle)
-                                    .frame(width: 200, height: 200)
-                                    .background(Color.red)
-                                    .foregroundStyle(.white)
-                                    .clipShape(Circle())
-                                    .shadow(color: .red.opacity(0.5), radius: 20, x: 0, y: 10)
+                            ZStack {
+                                Button(action: {
+                                    viewModel.buttonPressed()
+                                }) {
+                                    Text("Press")
+                                        .font(.largeTitle)
+                                        .frame(width: 200, height: 200)
+                                        .background(Color.red)
+                                        .foregroundStyle(.white)
+                                        .clipShape(Circle())
+                                        .shadow(color: .red.opacity(0.5), radius: 20, x: 0, y: 10)
+                                }
+                                
+                                if let bubble = viewModel.activeBubble {
+                                    Button(action: {
+                                        viewModel.bubbleTapped()
+                                    }) {
+                                        Text("+\(bubble.value)")
+                                            .font(.title3.bold())
+                                            .foregroundColor(.white)
+                                            .frame(width: 65, height: 65)
+                                            .background(
+                                                RadialGradient(colors: [.yellow, .orange], center: .center, startRadius: 0, endRadius: 32)
+                                            )
+                                            .clipShape(Circle())
+                                            .shadow(color: .orange.opacity(0.6), radius: 10)
+                                    }
+                                    .offset(x: bubble.xOffset, y: bubble.yOffset)
+                                    .transition(.scale.combined(with: .opacity))
+                                    .animation(.spring(response: 0.3, dampingFraction: 0.6), value: viewModel.activeBubble)
+                                }
                             }
                             
                             Text("Time left: \(viewModel.timeLeft)")
