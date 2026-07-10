@@ -142,7 +142,9 @@ struct LightItUpGameView: View {
                         if viewModel.timeLeft > 0 && viewModel.lives > 0 {
                             HStack(spacing: 30) {
                                 Text("Score: \(viewModel.currentScore)")
-                                Text("Time Left: \(viewModel.timeLeft)s")
+                                if viewModel.gameMode == .standard {
+                                    Text("Time Left: \(viewModel.timeLeft)s")
+                                }
                                 Text("Level: \(viewModel.level)")
                             }
                             .font(.title3.bold())

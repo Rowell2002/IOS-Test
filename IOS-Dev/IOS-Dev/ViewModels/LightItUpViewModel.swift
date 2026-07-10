@@ -129,15 +129,14 @@ class LightItUpViewModel: ObservableObject {
             .sink { [weak self] _ in
                 guard let self = self else { return }
                 if self.timerStarted && self.timeLeft > 0 && self.lives > 0 {
-                    self.timeLeft -= 1
-                    self.elapsedTime += 1
-                    
                     if self.gameMode == .standard {
+                        self.timeLeft -= 1
+                        self.elapsedTime += 1
                         self.updateLevel(forElapsed: self.elapsedTime)
-                    }
-                    
-                    if self.timeLeft == 0 {
-                        self.gameEnded()
+                        
+                        if self.timeLeft == 0 {
+                            self.gameEnded()
+                        }
                     }
                 }
             }
