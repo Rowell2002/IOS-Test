@@ -31,7 +31,7 @@ struct LightItUpGameView: View {
                                 .foregroundColor(.blue)
                                 .tracking(2)
                             
-                            Text("1. Tap the highlighted glowing tiles.\n2. Tap incorrect cards, and you lose a life!\n3. Beat the levels before time runs out!")
+                            Text(viewModel.gameMode == .memory ? "1. Memorize the glowing sequence of tiles.\n2. Replicate the sequence in the exact same order.\n3. Make a mistake, and you lose a life!" : "1. Tap the highlighted glowing tiles.\n2. Tap incorrect cards, and you lose a life!\n3. Beat the levels before time runs out!")
                                 .font(.body)
                                 .foregroundColor(.white.opacity(0.8))
                                 .lineSpacing(6)
@@ -60,6 +60,23 @@ struct LightItUpGameView: View {
                             RoundedRectangle(cornerRadius: 12)
                                 .stroke(Color.white.opacity(0.2), lineWidth: 1)
                         )
+                        .padding(.horizontal, 30)
+                        
+                        // Mode Selection Segmented Control
+                        VStack(spacing: 8) {
+                            Text("SELECT GAME MODE")
+                                .font(.caption.bold())
+                                .foregroundColor(.blue.opacity(0.8))
+                                .tracking(1)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            
+                            Picker("Game Mode", selection: $viewModel.gameMode) {
+                                ForEach(LightItUpMode.allCases) { mode in
+                                    Text(mode.rawValue).tag(mode)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+                        }
                         .padding(.horizontal, 30)
                         
                         // Personal Best
@@ -125,22 +142,42 @@ struct LightItUpGameView: View {
                         if viewModel.timeLeft > 0 && viewModel.lives > 0 {
                             HStack(spacing: 30) {
                                 Text("Score: \(viewModel.currentScore)")
-                                Text("Time Left: \(viewModel.timeLeft)s")
+                                if viewModel.gameMode == .standard {
+                                    Text("Time Left: \(viewModel.timeLeft)s")
+                                }
                                 Text("Level: \(viewModel.level)")
                             }
                             .font(.title3.bold())
                             .foregroundStyle(.white)
                             .padding(.bottom, 10)
                             
-                            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 15), count: viewModel.gridSize.cols), spacing: 15) {
-                                ForEach(0..<viewModel.totalCards, id: \.self) { index in
-                                    TileCard(isActive: viewModel.activeIndices.contains(index), glowColor: viewModel.glowColor) {
-                                        viewModel.tileTapped(index: index)
+                            ZStack {
+                                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 15), count: viewModel.gridSize.cols), spacing: 15) {
+                                    ForEach(0..<viewModel.totalCards, id: \.self) { index in
+                                        TileCard(isActive: viewModel.activeIndices.contains(index), glowColor: viewModel.glowColor) {
+                                            viewModel.tileTapped(index: index)
+                                        }
+                                        .aspectRatio(1, contentMode: .fit)
                                     }
-                                    .aspectRatio(1, contentMode: .fit)
+                                }
+                                .padding(.horizontal, 20)
+                                .allowsHitTesting(!viewModel.isPlayingSequence)
+                                
+                                if viewModel.isPlayingSequence {
+                                    Text("Watch the Pattern...")
+                                        .font(.headline.bold())
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 24)
+                                        .padding(.vertical, 12)
+                                        .background(Color.black.opacity(0.85))
+                                        .cornerRadius(10)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .stroke(Color.blue.opacity(0.5), lineWidth: 1)
+                                        )
+                                        .transition(.scale.combined(with: .opacity))
                                 }
                             }
-                            .padding(.horizontal, 20)
                             .onAppear {
                                 viewModel.startGame()
                             }

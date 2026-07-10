@@ -22,6 +22,7 @@ class QuizRushViewModel: ObservableObject {
     @Published var questionTimeLeft = 15
     @Published var selectedCategoryID: Int? = nil
     @Published var isPersonalBestSet = false
+    @Published var selectedDifficulty: String = "any"
     
     private var timerSubscription: AnyCancellable?
     
@@ -76,6 +77,9 @@ class QuizRushViewModel: ObservableObject {
         var urlString = "https://opentdb.com/api.php?amount=10&type=multiple"
         if let categoryID = selectedCategoryID {
             urlString += "&category=\(categoryID)"
+        }
+        if selectedDifficulty != "any" {
+            urlString += "&difficulty=\(selectedDifficulty)"
         }
         guard let url = URL(string: urlString) else {
             loadState = .failure("Invalid URL")
