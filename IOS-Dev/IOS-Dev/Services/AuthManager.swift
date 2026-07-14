@@ -7,6 +7,7 @@ struct UserAccount: Codable, Identifiable, Equatable {
     let fullName: String
     let email: String
     let passwordHash: String
+    var avatar: String?
 }
 
 class AuthManager: ObservableObject {
@@ -37,7 +38,7 @@ class AuthManager: ObservableObject {
         }
         
         let hash = hashPassword(password)
-        let newAccount = UserAccount(id: UUID(), fullName: fullName, email: emailClean, passwordHash: hash)
+        let newAccount = UserAccount(id: UUID(), fullName: fullName, email: emailClean, passwordHash: hash, avatar: "👾")
         accounts.append(newAccount)
         saveAccounts(accounts)
         
@@ -57,6 +58,26 @@ class AuthManager: ObservableObject {
         }
         
         return (false, "Invalid email address or password.")
+    }
+    
+    func updateProfile(fullName: String, avatar: String) {
+        guard let user = currentUser else { return }
+        var accounts = getAccounts()
+        
+        let updatedAccount = UserAccount(
+            id: user.id,
+            fullName: fullName,
+            email: user.email,
+            passwordHash: user.passwordHash,
+            avatar: avatar
+        )
+        
+        if let idx = accounts.firstIndex(where: { $0.id == user.id }) {
+            accounts[idx] = updatedAccount
+            saveAccounts(accounts)
+        }
+        
+        loginSession(updatedAccount)
     }
     
     func logout() {
