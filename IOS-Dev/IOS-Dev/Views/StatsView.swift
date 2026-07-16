@@ -1,12 +1,45 @@
 import SwiftUI
 import Charts
 
+struct LeaderboardPlayer: Identifiable, Equatable {
+    let id = UUID()
+    let name: String
+    let avatar: String
+    let score: Int
+    let isUser: Bool
+}
+
 struct StatsView: View {
     @ObservedObject var sessionManager = GameSessionManager.shared
     
     @AppStorage("panicHighScore") private var tapHighScore = 0
     @AppStorage("tilesHighScore") private var tilesHighScore = 0
     @AppStorage("quizRushHighScore") private var quizHighScore = 0
+    
+    // User total score
+    var userTotalPoints: Int {
+        sessionManager.sessions.reduce(0) { $0 + $1.score }
+    }
+    
+    // Leaderboards list combining player with mock global list, sorted descending
+    var leaderboardPlayers: [LeaderboardPlayer] {
+        let userName = AuthManager.shared.currentUser?.fullName ?? "You"
+        let userAvatar = AuthManager.shared.currentUser?.avatar ?? "👾"
+        
+        let activeUser = LeaderboardPlayer(name: userName, avatar: userAvatar, score: userTotalPoints, isUser: true)
+        
+        let simulated = [
+            LeaderboardPlayer(name: "Apex Gamer 👑", avatar: "🚀", score: 950, isUser: false),
+            LeaderboardPlayer(name: "Reflex King ⚡", avatar: "🎮", score: 720, isUser: false),
+            LeaderboardPlayer(name: "Quiz Master 💡", avatar: "🏆", score: 480, isUser: false),
+            LeaderboardPlayer(name: "Pixel Ninja 🥷", avatar: "🐱", score: 250, isUser: false),
+            LeaderboardPlayer(name: "Noob Player 🐢", avatar: "🍕", score: 50, isUser: false)
+        ]
+        
+        var combined = simulated
+        combined.append(activeUser)
+        return combined.sorted(by: { $0.score > $1.score })
+    }
     
     var body: some View {
         ZStack {
@@ -46,7 +79,7 @@ struct StatsView: View {
                         
                         StatSummaryCard(
                             title: "Total Points",
-                            value: "\(sessionManager.sessions.reduce(0) { $0 + $1.score })",
+                            value: "\(userTotalPoints)",
                             icon: "sum",
                             color: .purple
                         )
@@ -83,6 +116,21 @@ struct StatsView: View {
                         .padding(.horizontal, 24)
                     }
                     
+                    // Global Leaderboard Section
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Global Leaderboard")
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 24)
+                        
+                        VStack(spacing: 10) {
+                            ForEach(Array(leaderboardPlayers.enumerated()), id: \.element.id) { index, player in
+                                LeaderboardRow(rank: index + 1, player: player)
+                            }
+                        }
+                        .padding(.horizontal, 24)
+                    }
+                    
                     // Recent Sessions Section
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Recent Sessions")
@@ -106,7 +154,7 @@ struct StatsView: View {
                         }
                     }
                 }
-                .padding(.bottom, 40)
+                .padding(.bottom, 120) // safety space for custom tab bar
             }
         }
         .navigationBarHidden(true)
@@ -200,7 +248,6 @@ struct GameProgressChart: View {
     let sessions: [GameSession]
     let themeColor: Color
     
-    // We display the last 7 sessions in chronological order
     var chartData: [GameSession] {
         Array(sessions.prefix(7).reversed())
     }
@@ -300,6 +347,56 @@ struct RecentSessionRow: View {
         .padding(12)
         .background(Color.white.opacity(0.03))
         .cornerRadius(12)
+    }
+}
+
+// MARK: - Leaderboard Row Component
+struct LeaderboardRow: View {
+    let rank: Int
+    let player: LeaderboardPlayer
+    
+    var body: some View {
+        HStack(spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(rankColor(rank).opacity(0.18))
+                    .frame(width: 32, height: 32)
+                
+                Text("\(rank)")
+                    .font(.system(size: 14, weight: .bold, design: .rounded))
+                    .foregroundColor(rankColor(rank))
+            }
+            
+            Text(player.avatar)
+                .font(.system(size: 24))
+            
+            Text(player.name)
+                .font(.system(size: 15, weight: player.isUser ? .heavy : .bold, design: .rounded))
+                .foregroundColor(player.isUser ? Color(red: 220/255, green: 180/255, blue: 255/255) : .white)
+            
+            Spacer()
+            
+            Text("\(player.score) pts")
+                .font(.system(size: 15, weight: .bold, design: .rounded))
+                .foregroundColor(player.isUser ? Color(red: 220/255, green: 180/255, blue: 255/255) : .white.opacity(0.6))
+        }
+        .padding(14)
+        .background(player.isUser ? Color.purple.opacity(0.12) : Color.white.opacity(0.04))
+        .cornerRadius(16)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(player.isUser ? Color.purple.opacity(0.5) : Color.white.opacity(0.08), lineWidth: player.isUser ? 1.5 : 1)
+        )
+        .shadow(color: player.isUser ? .purple.opacity(0.15) : .clear, radius: 6, x: 0, y: 3)
+    }
+    
+    private func rankColor(_ rank: Int) -> Color {
+        switch rank {
+        case 1:  return .yellow
+        case 2:  return Color(white: 0.82)
+        case 3:  return Color(red: 0.8, green: 0.52, blue: 0.32)
+        default: return .white.opacity(0.55)
+        }
     }
 }
 
