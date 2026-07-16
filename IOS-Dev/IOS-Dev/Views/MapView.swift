@@ -6,29 +6,59 @@ struct MapView: View {
     @State private var selectedSession: GameSession? = nil
     @State private var position: MapCameraPosition = .automatic
     
+    // Filter State
+    @State private var selectedFilter: String = "All"
+    
     var sessionsWithLocation: [GameSession] {
         sessionManager.sessions.filter { $0.latitude != nil && $0.longitude != nil }
+    }
+    
+    var filteredSessions: [GameSession] {
+        let items = sessionsWithLocation
+        if selectedFilter == "All" {
+            return items
+        }
+        return items.filter { $0.gameMode == selectedFilter }
+    }
+    
+    // Find the session with the absolute highest score
+    var highestScoreSession: GameSession? {
+        sessionsWithLocation.max(by: { $0.score < $1.score })
     }
     
     var body: some View {
         ZStack {
             Map(position: $position, selection: $selectedSession) {
-                ForEach(sessionsWithLocation) { session in
+                ForEach(filteredSessions) { session in
+                    let isHighest = session.id == highestScoreSession?.id
+                    
                     Annotation(session.gameMode, coordinate: CLLocationCoordinate2D(latitude: session.latitude!, longitude: session.longitude!)) {
                         VStack(spacing: 0) {
-                            Text("\(session.score)")
-                                .font(.system(size: 12, weight: .bold))
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(colorForMode(session.gameMode))
-                                .cornerRadius(8)
-                                .shadow(radius: 3)
+                            HStack(spacing: 4) {
+                                if isHighest {
+                                    Image(systemName: "crown.fill")
+                                        .foregroundColor(Color(red: 45/255, green: 20/255, blue: 70/255))
+                                        .font(.system(size: 11, weight: .bold))
+                                }
+                                Text("\(session.score)")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(isHighest ? Color(red: 45/255, green: 20/255, blue: 70/255) : .white)
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(
+                                isHighest
+                                ? LinearGradient(colors: [.yellow, Color(red: 1.0, green: 0.8, blue: 0.1)], startPoint: .top, endPoint: .bottom)
+                                : LinearGradient(colors: [colorForMode(session.gameMode), colorForMode(session.gameMode)], startPoint: .top, endPoint: .bottom)
+                            )
+                            .cornerRadius(8)
+                            .shadow(color: isHighest ? .yellow.opacity(0.6) : .black.opacity(0.3), radius: isHighest ? 6 : 2)
+                            .scaleEffect(isHighest ? 1.15 : 1.0)
                             
                             Image(systemName: "triangle.fill")
                                 .resizable()
                                 .frame(width: 8, height: 6)
-                                .foregroundColor(colorForMode(session.gameMode))
+                                .foregroundColor(isHighest ? Color(red: 1.0, green: 0.8, blue: 0.1) : colorForMode(session.gameMode))
                                 .rotationEffect(.degrees(180))
                                 .offset(y: -2)
                         }
@@ -42,7 +72,7 @@ struct MapView: View {
             
             // UI Overlay
             VStack {
-                // Customized Header
+                // Customized Header Card
                 VStack(alignment: .leading, spacing: 4) {
                     Text("GAME MAP")
                         .font(.system(size: 11, weight: .bold, design: .rounded))
@@ -63,6 +93,32 @@ struct MapView: View {
                 )
                 .padding(.horizontal)
                 .padding(.top, 16)
+                
+                // Sliding Filters Control below Header
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(["All", "Tap Frenzy", "Light It Up", "Quiz Rush"], id: \.self) { filter in
+                            Button(action: {
+                                selectedFilter = filter
+                                HapticManager.shared.impact(style: .light)
+                            }) {
+                                Text(filter)
+                                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                                    .foregroundColor(selectedFilter == filter ? Color.black : Color.white.opacity(0.8))
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 7)
+                                    .background(selectedFilter == filter ? Color.purple : Color.white.opacity(0.08))
+                                    .cornerRadius(10)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .stroke(selectedFilter == filter ? Color.purple : Color.white.opacity(0.12), lineWidth: 1)
+                                    )
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                }
+                .padding(.vertical, 4)
                 
                 Spacer()
                 
@@ -114,21 +170,35 @@ struct MapView: View {
     }
     
     private func sessionDetailCard(session: GameSession) -> some View {
-        HStack(spacing: 16) {
+        let isHighest = session.id == highestScoreSession?.id
+        
+        return HStack(spacing: 16) {
             ZStack {
                 Circle()
-                    .fill(colorForMode(session.gameMode).opacity(0.15))
+                    .fill(isHighest ? Color.yellow.opacity(0.15) : colorForMode(session.gameMode).opacity(0.15))
                     .frame(width: 48, height: 48)
                 
-                Image(systemName: iconForMode(session.gameMode))
-                    .foregroundColor(colorForMode(session.gameMode))
+                Image(systemName: isHighest ? "crown.fill" : iconForMode(session.gameMode))
+                    .foregroundColor(isHighest ? .yellow : colorForMode(session.gameMode))
                     .font(.title3)
             }
             
             VStack(alignment: .leading, spacing: 4) {
-                Text(session.gameMode)
-                    .font(.system(size: 17, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                HStack(spacing: 6) {
+                    Text(session.gameMode)
+                        .font(.system(size: 17, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                    
+                    if isHighest {
+                        Text("PB 👑")
+                            .font(.system(size: 10, weight: .heavy))
+                            .foregroundColor(.black)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.yellow)
+                            .cornerRadius(4)
+                    }
+                }
                 
                 Text(session.date, style: .date)
                     .font(.caption)
@@ -144,7 +214,7 @@ struct MapView: View {
             VStack(alignment: .trailing, spacing: 4) {
                 Text("\(session.score)")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(colorForMode(session.gameMode))
+                    .foregroundColor(isHighest ? .yellow : colorForMode(session.gameMode))
                 Text("Score")
                     .font(.system(size: 10, weight: .bold))
                     .foregroundColor(.white.opacity(0.4))
@@ -166,11 +236,11 @@ struct MapView: View {
         .cornerRadius(18)
         .overlay(
             RoundedRectangle(cornerRadius: 18)
-                .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                .stroke(isHighest ? Color.yellow.opacity(0.4) : Color.white.opacity(0.15), lineWidth: 1)
         )
         .padding(.horizontal)
         .padding(.bottom, 80) // Leave space for custom tab bar
-        .shadow(color: .black.opacity(0.4), radius: 10, x: 0, y: 5)
+        .shadow(color: isHighest ? .yellow.opacity(0.1) : .black.opacity(0.4), radius: 10, x: 0, y: 5)
     }
 }
 

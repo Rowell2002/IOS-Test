@@ -22,7 +22,26 @@ struct DailyChallengeHelper {
     
     // MARK: - Streak
     static var currentStreak: Int {
-        UserDefaults.standard.integer(forKey: streakCountKey)
+        let defaults = UserDefaults.standard
+        guard let lastPlayed = defaults.string(forKey: lastPlayedDateKey) else {
+            return 0
+        }
+        
+        if lastPlayed == todayString {
+            return defaults.integer(forKey: streakCountKey)
+        }
+        
+        let calendar = Calendar.current
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: Date())!
+        let yesterdayString = dateString(for: yesterday)
+        
+        if lastPlayed == yesterdayString {
+            return defaults.integer(forKey: streakCountKey)
+        }
+        
+        // Streak broken! Reset to 0
+        defaults.set(0, forKey: streakCountKey)
+        return 0
     }
     
     // MARK: - Mark As Played

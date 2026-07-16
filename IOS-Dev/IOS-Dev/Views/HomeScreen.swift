@@ -3,6 +3,8 @@ import SwiftUI
 struct HomeScreen: View {
     @State private var hasPlayedDailyChallenge = false
     @State private var streak: Int = 0
+    @StateObject private var authManager = AuthManager.shared
+    @State private var showProfileSheet = false
     
     var body: some View {
         ZStack {
@@ -42,14 +44,17 @@ struct HomeScreen: View {
                                 .fill(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
                                 .frame(width: 36, height: 36)
                             
-                            Image(systemName: "person.fill")
-                                .foregroundColor(.white)
-                                .font(.system(size: 16))
+                            Text(authManager.currentUser?.avatar ?? "👾")
+                                .font(.system(size: 20))
                         }
                         .overlay(
                             Circle()
-                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                .stroke(Color.purple.opacity(0.35), lineWidth: 1.5)
                         )
+                        .contentShape(Circle())
+                        .onTapGesture {
+                            showProfileSheet = true
+                        }
                     }
                     .padding(.horizontal, 24)
                     .padding(.top, 16)
@@ -136,6 +141,9 @@ struct HomeScreen: View {
             }
         }
         .navigationBarHidden(true)
+        .sheet(isPresented: $showProfileSheet) {
+            ProfileEditView()
+        }
         .onAppear {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                 hasPlayedDailyChallenge = DailyChallengeHelper.hasPlayedToday
@@ -365,6 +373,143 @@ struct StreakBannerView: View {
                 )
         )
         .shadow(color: flameColor.opacity(0.15), radius: 8, x: 0, y: 4)
+    }
+}
+
+// MARK: - Profile Edit View
+struct ProfileEditView: View {
+    @Environment(\.dismiss) var dismiss
+    @StateObject private var authManager = AuthManager.shared
+    
+    @State private var fullName = ""
+    @State private var selectedAvatar = "👾"
+    
+    let avatarOptions = ["👾", "🚀", "🎮", "🏆", "👑", "🦄", "🦊", "🐯", "🐼", "🦁", "👻", "🧙‍♂️", "😺", "🤖", "⭐", "🍕"]
+    
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Color.black.ignoresSafeArea()
+                
+                GridBackground().ignoresSafeArea()
+                
+                VStack(spacing: 28) {
+                    Text("Edit Profile")
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .padding(.top, 20)
+                    
+                    ZStack {
+                        Circle()
+                            .fill(LinearGradient(colors: [.purple, .blue], startPoint: .topLeading, endPoint: .bottomTrailing))
+                            .frame(width: 100, height: 100)
+                            .shadow(color: .purple.opacity(0.4), radius: 15)
+                        
+                        Text(selectedAvatar)
+                            .font(.system(size: 55))
+                    }
+                    .overlay(
+                        Circle()
+                            .stroke(Color.white.opacity(0.15), lineWidth: 2)
+                    )
+                    
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("SELECT AVATAR")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.white.opacity(0.5))
+                            .tracking(1.5)
+                        
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 6), spacing: 12) {
+                            ForEach(avatarOptions, id: \.self) { avatar in
+                                Button(action: {
+                                    selectedAvatar = avatar
+                                    HapticManager.shared.impact(style: .light)
+                                }) {
+                                    Text(avatar)
+                                        .font(.system(size: 30))
+                                        .frame(width: 50, height: 50)
+                                        .background(selectedAvatar == avatar ? Color.purple.opacity(0.2) : Color.white.opacity(0.04))
+                                        .cornerRadius(12)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .stroke(selectedAvatar == avatar ? Color.purple : Color.white.opacity(0.08), lineWidth: 1.5)
+                                        )
+                                }
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                    
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("FULL NAME")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.white.opacity(0.5))
+                            .tracking(1.5)
+                        
+                        HStack(spacing: 12) {
+                            Image(systemName: "person.fill")
+                                .foregroundColor(.white.opacity(0.4))
+                            
+                            TextField("", text: $fullName, prompt: Text("Enter your full name").foregroundColor(.white.opacity(0.25)))
+                                .foregroundColor(.white)
+                                .font(.system(size: 16, weight: .semibold))
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 14)
+                        .background(Color.white.opacity(0.035))
+                        .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                        )
+                    }
+                    .padding(.horizontal, 24)
+                    
+                    Spacer()
+                    
+                    HStack(spacing: 16) {
+                        Button("Cancel") {
+                            dismiss()
+                        }
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 15)
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(14)
+                        
+                        Button("Save") {
+                            saveProfile()
+                        }
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundColor(Color(red: 45/255, green: 20/255, blue: 70/255))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 15)
+                        .background(Color(red: 220/255, green: 180/255, blue: 255/255))
+                        .cornerRadius(14)
+                        .shadow(color: Color(red: 220/255, green: 180/255, blue: 255/255).opacity(0.3), radius: 8, x: 0, y: 4)
+                        .disabled(fullName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 20)
+                }
+            }
+            .onAppear {
+                if let user = authManager.currentUser {
+                    fullName = user.fullName
+                    selectedAvatar = user.avatar ?? "👾"
+                }
+            }
+        }
+    }
+    
+    private func saveProfile() {
+        let nameClean = fullName.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !nameClean.isEmpty {
+            authManager.updateProfile(fullName: nameClean, avatar: selectedAvatar)
+            HapticManager.shared.notification(type: .success)
+            dismiss()
+        }
     }
 }
 

@@ -46,23 +46,7 @@ struct QuizRushGameView: View {
                         )
                         .padding(.horizontal, 20)
                         
-                        // Player Name Input
-                        HStack(spacing: 12) {
-                            Image(systemName: "person.fill")
-                                .foregroundColor(.purple)
-                            TextField("", text: $viewModel.playerName, prompt: Text("Enter Player Name").foregroundColor(.white.opacity(0.4)))
-                                .foregroundColor(.white)
-                                .font(.headline)
-                        }
-                        .padding()
-                        .background(Color.white.opacity(0.1))
-                        .cornerRadius(12)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                        )
-                        .padding(.horizontal, 30)
-                        
+
                         // Category Selection Dropdown
                         HStack {
                             Image(systemName: "list.bullet")
@@ -253,8 +237,6 @@ struct QuizRushGameView: View {
             }
             ConfettiView(isTriggered: $viewModel.isPersonalBestSet)
         }
-        .navigationTitle("Quiz Rush")
-        .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showHistory) {
             ScoreHistorySheet(
                 gameTitle: "Quiz Rush",
