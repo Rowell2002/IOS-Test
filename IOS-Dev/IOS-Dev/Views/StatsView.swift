@@ -12,9 +12,18 @@ struct LeaderboardPlayer: Identifiable, Equatable {
 struct StatsView: View {
     @ObservedObject var sessionManager = GameSessionManager.shared
     
-    @AppStorage("panicHighScore") private var tapHighScore = 0
-    @AppStorage("tilesHighScore") private var tilesHighScore = 0
-    @AppStorage("quizRushHighScore") private var quizHighScore = 0
+    var tapHighScore: Int {
+        let key = AuthManager.shared.currentUser.map { "panicHighScore_\($0.email)" } ?? "panicHighScore"
+        return UserDefaults.standard.integer(forKey: key)
+    }
+    var tilesHighScore: Int {
+        let key = AuthManager.shared.currentUser.map { "tilesHighScore_\($0.email)" } ?? "tilesHighScore"
+        return UserDefaults.standard.integer(forKey: key)
+    }
+    var quizHighScore: Int {
+        let key = AuthManager.shared.currentUser.map { "quizRushHighScore_\($0.email)" } ?? "quizRushHighScore"
+        return UserDefaults.standard.integer(forKey: key)
+    }
     
     // User total score
     var userTotalPoints: Int {
@@ -23,22 +32,43 @@ struct StatsView: View {
     
     // Leaderboards list combining player with mock global list, sorted descending
     var leaderboardPlayers: [LeaderboardPlayer] {
-        let userName = AuthManager.shared.currentUser?.fullName ?? "You"
-        let userAvatar = AuthManager.shared.currentUser?.avatar ?? "👾"
+        let accounts = AuthManager.shared.getAllAccounts()
+        var players: [LeaderboardPlayer] = []
+        var processedEmails = Set<String>()
         
-        let activeUser = LeaderboardPlayer(name: userName, avatar: userAvatar, score: userTotalPoints, isUser: true)
+        for account in accounts {
+            let score = totalPoints(for: account.email)
+            let isCurrent = account.email == (AuthManager.shared.currentUser?.email ?? "")
+            
+            players.append(LeaderboardPlayer(
+                name: account.fullName,
+                avatar: account.avatar ?? "👾",
+                score: score,
+                isUser: isCurrent
+            ))
+            processedEmails.insert(account.email)
+        }
         
-        let simulated = [
-            LeaderboardPlayer(name: "Apex Gamer 👑", avatar: "🚀", score: 950, isUser: false),
-            LeaderboardPlayer(name: "Reflex King ⚡", avatar: "🎮", score: 720, isUser: false),
-            LeaderboardPlayer(name: "Quiz Master 💡", avatar: "🏆", score: 480, isUser: false),
-            LeaderboardPlayer(name: "Pixel Ninja 🥷", avatar: "🐱", score: 250, isUser: false),
-            LeaderboardPlayer(name: "Noob Player 🐢", avatar: "🍕", score: 50, isUser: false)
-        ]
+        if let currentUser = AuthManager.shared.currentUser, !processedEmails.contains(currentUser.email) {
+            let score = totalPoints(for: currentUser.email)
+            players.append(LeaderboardPlayer(
+                name: currentUser.fullName,
+                avatar: currentUser.avatar ?? "👾",
+                score: score,
+                isUser: true
+            ))
+        }
         
-        var combined = simulated
-        combined.append(activeUser)
-        return combined.sorted(by: { $0.score > $1.score })
+        return players.sorted(by: { $0.score > $1.score })
+    }
+    
+    private func totalPoints(for email: String) -> Int {
+        let key = "gameSessions_\(email)"
+        guard let data = UserDefaults.standard.data(forKey: key),
+              let decoded = try? JSONDecoder().decode([GameSession].self, from: data) else {
+            return 0
+        }
+        return decoded.reduce(0) { $0 + $1.score }
     }
     
     var body: some View {

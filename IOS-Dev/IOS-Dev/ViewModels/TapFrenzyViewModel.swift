@@ -9,11 +9,7 @@ struct PowerUpBubble: Identifiable, Equatable {
 }
 
 class TapFrenzyViewModel: ObservableObject {
-    @Published var highScore: Int = UserDefaults.standard.integer(forKey: "panicHighScore") {
-        didSet {
-            UserDefaults.standard.set(highScore, forKey: "panicHighScore")
-        }
-    }
+    @Published var highScore: Int = 0
     @Published var playerName: String = UserDefaults.standard.string(forKey: "savedPlayerName") ?? "Guest" {
         didSet {
             UserDefaults.standard.set(playerName, forKey: "savedPlayerName")
@@ -31,6 +27,8 @@ class TapFrenzyViewModel: ObservableObject {
     
     func loadPlayerName() {
         playerName = UserDefaults.standard.string(forKey: "savedPlayerName") ?? "Guest"
+        let key = AuthManager.shared.currentUser.map { "panicHighScore_\($0.email)" } ?? "panicHighScore"
+        highScore = UserDefaults.standard.integer(forKey: key)
     }
     
     func buttonPressed() {
@@ -94,6 +92,8 @@ class TapFrenzyViewModel: ObservableObject {
                             self.highScore = self.pressCount
                             self.isPersonalBestSet = true
                             newHigh = true
+                            let key = AuthManager.shared.currentUser.map { "panicHighScore_\($0.email)" } ?? "panicHighScore"
+                            UserDefaults.standard.set(self.pressCount, forKey: key)
                         }
                         
                         let name = self.playerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Guest" : self.playerName

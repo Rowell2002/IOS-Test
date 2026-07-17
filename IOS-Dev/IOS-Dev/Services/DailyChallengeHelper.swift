@@ -9,8 +9,18 @@ struct DailyChallengeHelper {
     }
     
     // MARK: - Keys
-    static let lastPlayedDateKey = "lastPlayedDailyChallengeDate"
-    static let streakCountKey    = "dailyChallengeStreak"
+    private static var lastPlayedDateKey: String {
+        if let currentUser = AuthManager.shared.currentUser {
+            return "lastPlayedDailyChallengeDate_\(currentUser.email)"
+        }
+        return "lastPlayedDailyChallengeDate"
+    }
+    private static var streakCountKey: String {
+        if let currentUser = AuthManager.shared.currentUser {
+            return "dailyChallengeStreak_\(currentUser.email)"
+        }
+        return "dailyChallengeStreak"
+    }
     
     // MARK: - Has Played Today
     static var hasPlayedToday: Bool {

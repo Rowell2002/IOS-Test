@@ -2,11 +2,7 @@ import SwiftUI
 import Combine
 
 class QuizRushViewModel: ObservableObject {
-    @Published var highScore: Int = UserDefaults.standard.integer(forKey: "quizRushHighScore") {
-        didSet {
-            UserDefaults.standard.set(highScore, forKey: "quizRushHighScore")
-        }
-    }
+    @Published var highScore: Int = 0
     
     @Published var playerName: String = UserDefaults.standard.string(forKey: "savedPlayerName") ?? "Guest" {
         didSet {
@@ -28,6 +24,8 @@ class QuizRushViewModel: ObservableObject {
     
     func loadPlayerName() {
         playerName = UserDefaults.standard.string(forKey: "savedPlayerName") ?? "Guest"
+        let key = AuthManager.shared.currentUser.map { "quizRushHighScore_\($0.email)" } ?? "quizRushHighScore"
+        highScore = UserDefaults.standard.integer(forKey: key)
     }
     
     @Published var selectedAnswerIndex: Int? = nil
@@ -186,6 +184,8 @@ class QuizRushViewModel: ObservableObject {
                 highScore = score
                 isPersonalBestSet = true
                 newHigh = true
+                let key = AuthManager.shared.currentUser.map { "quizRushHighScore_\($0.email)" } ?? "quizRushHighScore"
+                UserDefaults.standard.set(score, forKey: key)
             }
             
             let name = self.playerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Guest" : self.playerName

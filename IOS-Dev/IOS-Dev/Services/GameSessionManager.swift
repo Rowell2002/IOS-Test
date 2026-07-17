@@ -11,8 +11,15 @@ class GameSessionManager: ObservableObject {
         loadSessions()
     }
     
+    private var scopedSessionsKey: String {
+        if let currentUser = AuthManager.shared.currentUser {
+            return "gameSessions_\(currentUser.email)"
+        }
+        return "gameSessions"
+    }
+    
     func loadSessions() {
-        guard let data = UserDefaults.standard.data(forKey: "gameSessions"),
+        guard let data = UserDefaults.standard.data(forKey: scopedSessionsKey),
               let decoded = try? JSONDecoder().decode([GameSession].self, from: data) else {
             self.sessions = []
             return
@@ -44,23 +51,34 @@ class GameSessionManager: ObservableObject {
     
     private func saveToUserDefaults() {
         if let encoded = try? JSONEncoder().encode(sessions) {
-            UserDefaults.standard.set(encoded, forKey: "gameSessions")
+            UserDefaults.standard.set(encoded, forKey: scopedSessionsKey)
         }
     }
     
     func resetAll() {
         sessions.removeAll()
-        UserDefaults.standard.removeObject(forKey: "gameSessions")
+        UserDefaults.standard.removeObject(forKey: scopedSessionsKey)
         
-        // Also reset high scores
-        UserDefaults.standard.set(0, forKey: "panicHighScore")
-        UserDefaults.standard.set(0, forKey: "tilesHighScore")
-        UserDefaults.standard.set(0, forKey: "quizRushHighScore")
-        
-        // Also reset individual game histories if any
-        UserDefaults.standard.removeObject(forKey: "tapFrenzyHistory")
-        UserDefaults.standard.removeObject(forKey: "lightItUpHistory")
-        UserDefaults.standard.removeObject(forKey: "quizRushHistory")
+        if let currentUser = AuthManager.shared.currentUser {
+            let email = currentUser.email
+            UserDefaults.standard.set(0, forKey: "panicHighScore_\(email)")
+            UserDefaults.standard.set(0, forKey: "tilesHighScore_\(email)")
+            UserDefaults.standard.set(0, forKey: "quizRushHighScore_\(email)")
+            
+            UserDefaults.standard.removeObject(forKey: "tapFrenzyHistory_\(email)")
+            UserDefaults.standard.removeObject(forKey: "lightItUpHistory_\(email)")
+            UserDefaults.standard.removeObject(forKey: "quizRushHistory_\(email)")
+        } else {
+            // Also reset high scores
+            UserDefaults.standard.set(0, forKey: "panicHighScore")
+            UserDefaults.standard.set(0, forKey: "tilesHighScore")
+            UserDefaults.standard.set(0, forKey: "quizRushHighScore")
+            
+            // Also reset individual game histories if any
+            UserDefaults.standard.removeObject(forKey: "tapFrenzyHistory")
+            UserDefaults.standard.removeObject(forKey: "lightItUpHistory")
+            UserDefaults.standard.removeObject(forKey: "quizRushHistory")
+        }
         
         // Reset daily challenge played date
         DailyChallengeHelper.resetDailyChallenge()

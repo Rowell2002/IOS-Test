@@ -9,11 +9,7 @@ enum LightItUpMode: String, CaseIterable, Identifiable {
 }
 
 class LightItUpViewModel: ObservableObject {
-    @Published var highScore: Int = UserDefaults.standard.integer(forKey: "tilesHighScore") {
-        didSet {
-            UserDefaults.standard.set(highScore, forKey: "tilesHighScore")
-        }
-    }
+    @Published var highScore: Int = 0
     
     @Published var playerName: String = UserDefaults.standard.string(forKey: "savedPlayerName") ?? "Guest" {
         didSet {
@@ -44,6 +40,8 @@ class LightItUpViewModel: ObservableObject {
     
     func loadPlayerName() {
         playerName = UserDefaults.standard.string(forKey: "savedPlayerName") ?? "Guest"
+        let key = AuthManager.shared.currentUser.map { "tilesHighScore_\($0.email)" } ?? "tilesHighScore"
+        highScore = UserDefaults.standard.integer(forKey: key)
     }
     
     var gridSize: (rows: Int, cols: Int) {
@@ -337,6 +335,8 @@ class LightItUpViewModel: ObservableObject {
             highScore = currentScore
             isPersonalBestSet = true
             newHigh = true
+            let key = AuthManager.shared.currentUser.map { "tilesHighScore_\($0.email)" } ?? "tilesHighScore"
+            UserDefaults.standard.set(currentScore, forKey: key)
         }
         
         let name = self.playerName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Guest" : self.playerName
