@@ -12,6 +12,8 @@ struct LeaderboardPlayer: Identifiable, Equatable {
 struct StatsView: View {
     @ObservedObject var sessionManager = GameSessionManager.shared
     
+    @State private var selectedGameFilter: String = "All"
+    
     var tapHighScore: Int {
         let key = AuthManager.shared.currentUser.map { "panicHighScore_\($0.email)" } ?? "panicHighScore"
         return UserDefaults.standard.integer(forKey: key)
@@ -23,6 +25,62 @@ struct StatsView: View {
     var quizHighScore: Int {
         let key = AuthManager.shared.currentUser.map { "quizRushHighScore_\($0.email)" } ?? "quizRushHighScore"
         return UserDefaults.standard.integer(forKey: key)
+    }
+    
+    // Scoped models for Multi-Player History
+    struct PlayerGameSession: Identifiable {
+        let id = UUID()
+        let playerName: String
+        let playerAvatar: String
+        let gameMode: String
+        let score: Int
+        let date: Date
+    }
+    
+    var allPlayersSessions: [PlayerGameSession] {
+        var allSessions: [PlayerGameSession] = []
+        let accounts = AuthManager.shared.getAllAccounts()
+        
+        for account in accounts {
+            let key = "gameSessions_\(account.email)"
+            if let data = UserDefaults.standard.data(forKey: key),
+               let decoded = try? JSONDecoder().decode([GameSession].self, from: data) {
+                for session in decoded {
+                    allSessions.append(PlayerGameSession(
+                        playerName: account.fullName,
+                        playerAvatar: account.avatar ?? "👾",
+                        gameMode: session.gameMode,
+                        score: session.score,
+                        date: session.date
+                    ))
+                }
+            }
+        }
+        
+        if let currentUser = AuthManager.shared.currentUser, !accounts.contains(where: { $0.email == currentUser.email }) {
+            let key = "gameSessions_\(currentUser.email)"
+            if let data = UserDefaults.standard.data(forKey: key),
+               let decoded = try? JSONDecoder().decode([GameSession].self, from: data) {
+                for session in decoded {
+                    allSessions.append(PlayerGameSession(
+                        playerName: currentUser.fullName,
+                        playerAvatar: currentUser.avatar ?? "👾",
+                        gameMode: session.gameMode,
+                        score: session.score,
+                        date: session.date
+                    ))
+                }
+            }
+        }
+        
+        return allSessions.sorted(by: { $0.date > $1.date })
+    }
+    
+    var filteredAllPlayersSessions: [PlayerGameSession] {
+        if selectedGameFilter == "All" {
+            return allPlayersSessions
+        }
+        return allPlayersSessions.filter { $0.gameMode == selectedGameFilter }
     }
     
     // User total score
@@ -87,7 +145,7 @@ struct StatsView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("PERFORMANCE")
                             .font(.system(size: 13, weight: .bold, design: .rounded))
-                            .foregroundColor(.purple)
+                            .foregroundColor(Color(red: 220/255, green: 170/255, blue: 255/255))
                             .tracking(3)
                         
                         Text("Stats & Analytics")
@@ -161,23 +219,49 @@ struct StatsView: View {
                         .padding(.horizontal, 24)
                     }
                     
-                    // Recent Sessions Section
+                    // All Players' Score History Section
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Recent Sessions")
+                        Text("All Players' Score History")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
                             .padding(.horizontal, 24)
                         
-                        if sessionManager.sessions.isEmpty {
-                            Text("No sessions recorded yet. Play some games first!")
+                        // Game mode picker chips
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(["All", "Tap Frenzy", "Light It Up", "Quiz Rush"], id: \.self) { filter in
+                                    Button(action: {
+                                        selectedGameFilter = filter
+                                        HapticManager.shared.impact(style: .light)
+                                    }) {
+                                        Text(filter)
+                                            .font(.system(size: 12, weight: .bold, design: .rounded))
+                                            .foregroundColor(selectedGameFilter == filter ? Color.black : Color.white.opacity(0.8))
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 6)
+                                            .background(selectedGameFilter == filter ? Color.purple : Color.white.opacity(0.08))
+                                            .cornerRadius(8)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 8)
+                                                    .stroke(selectedGameFilter == filter ? Color.purple : Color.white.opacity(0.12), lineWidth: 1)
+                                            )
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 24)
+                        }
+                        .padding(.bottom, 4)
+                        
+                        if filteredAllPlayersSessions.isEmpty {
+                            Text("No history recorded for this game mode.")
                                 .font(.system(size: 14))
                                 .foregroundColor(.white.opacity(0.45))
                                 .padding(.horizontal, 24)
                                 .padding(.vertical, 8)
                         } else {
                             VStack(spacing: 10) {
-                                ForEach(sessionManager.sessions.prefix(5)) { session in
-                                    RecentSessionRow(session: session)
+                                ForEach(filteredAllPlayersSessions.prefix(15)) { session in
+                                    AllPlayersSessionRow(session: session)
                                 }
                             }
                             .padding(.horizontal, 24)
@@ -426,6 +510,66 @@ struct LeaderboardRow: View {
         case 2:  return Color(white: 0.82)
         case 3:  return Color(red: 0.8, green: 0.52, blue: 0.32)
         default: return .white.opacity(0.55)
+        }
+    }
+}
+
+// MARK: - All Players Session Row Component
+struct AllPlayersSessionRow: View {
+    let session: StatsView.PlayerGameSession
+    
+    private var relativeTime: String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .full
+        return formatter.localizedString(for: session.date, relativeTo: Date())
+    }
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Text(session.playerAvatar)
+                .font(.system(size: 24))
+            
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 6) {
+                    Text(session.playerName)
+                        .font(.system(size: 15, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                    
+                    Text(session.gameMode)
+                        .font(.system(size: 10, weight: .bold, design: .rounded))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(colorForMode(session.gameMode))
+                        .cornerRadius(4)
+                }
+                
+                Text(relativeTime)
+                    .font(.system(size: 11))
+                    .foregroundColor(.white.opacity(0.5))
+            }
+            
+            Spacer()
+            
+            Text("Score: \(session.score)")
+                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .foregroundColor(.white)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(Color.white.opacity(0.1))
+                .cornerRadius(8)
+        }
+        .padding(12)
+        .background(Color.white.opacity(0.03))
+        .cornerRadius(12)
+    }
+    
+    private func colorForMode(_ mode: String) -> Color {
+        switch mode {
+        case "Tap Frenzy": return .green
+        case "Light It Up", "Simon Says": return .blue
+        case "Quiz Rush": return .red
+        default: return .purple
         }
     }
 }

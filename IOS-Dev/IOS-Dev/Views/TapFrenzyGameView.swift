@@ -28,12 +28,12 @@ struct TapFrenzyGameView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("HOW TO PLAY")
                                 .font(.caption.bold())
-                                .foregroundColor(.red)
+                                .foregroundColor(Color(red: 255/255, green: 120/255, blue: 120/255))
                                 .tracking(2)
                             
                             Text("1. Tap the giant button as fast as you can.\n2. You have exactly 10 seconds.\n3. Rack up the highest score possible!")
                                 .font(.body)
-                                .foregroundColor(.white.opacity(0.8))
+                                .foregroundColor(.white)
                                 .lineSpacing(6)
                         }
                         .padding(24)
