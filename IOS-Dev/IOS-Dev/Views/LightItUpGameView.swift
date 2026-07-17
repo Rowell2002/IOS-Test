@@ -28,12 +28,12 @@ struct LightItUpGameView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("HOW TO PLAY")
                                 .font(.caption.bold())
-                                .foregroundColor(.blue)
+                                .foregroundColor(Color(red: 140/255, green: 195/255, blue: 255/255))
                                 .tracking(2)
                             
                             Text(viewModel.gameMode == .memory ? "1. Memorize the glowing sequence of tiles.\n2. Replicate the sequence in the exact same order.\n3. Make a mistake, and you lose a life!" : "1. Tap the highlighted glowing tiles.\n2. Tap incorrect cards, and you lose a life!\n3. Beat the levels before time runs out!")
                                 .font(.body)
-                                .foregroundColor(.white.opacity(0.8))
+                                .foregroundColor(.white)
                                 .lineSpacing(6)
                         }
                         .padding(24)
@@ -51,7 +51,7 @@ struct LightItUpGameView: View {
                         VStack(spacing: 8) {
                             Text("SELECT GAME MODE")
                                 .font(.caption.bold())
-                                .foregroundColor(.blue.opacity(0.8))
+                                .foregroundColor(Color(red: 140/255, green: 195/255, blue: 255/255))
                                 .tracking(1)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             

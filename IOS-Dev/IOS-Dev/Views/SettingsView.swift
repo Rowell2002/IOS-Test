@@ -7,6 +7,8 @@ struct SettingsView: View {
     @AppStorage("notificationsEnabled") private var notificationsEnabled = false
     @AppStorage("dailyChallengeHour") private var dailyChallengeHour = 19
     @AppStorage("dailyChallengeMinute") private var dailyChallengeMinute = 0
+    @AppStorage("soundsEnabled") private var soundsEnabled = true
+    @AppStorage("hapticsEnabled") private var hapticsEnabled = true
     
     @State private var challengeTime = Date()
     @State private var showResetConfirmation = false
@@ -39,7 +41,7 @@ struct SettingsView: View {
                 .padding(.top, 24)
                 
                 // Form / List Container
-                ScrollView {
+                ScrollView(showsIndicators: false) {
                     VStack(spacing: 20) {
                         
                         // Notifications Settings Block
@@ -93,6 +95,55 @@ struct SettingsView: View {
                                     scheduleNotification(at: newTime)
                                 }
                             }
+                        }
+                        .padding()
+                        .background(Color.white.opacity(0.04))
+                        .cornerRadius(18)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 18)
+                                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                        )
+                        
+                        // Audio & Haptics Settings Block
+                        VStack(spacing: 16) {
+                            HStack {
+                                Image(systemName: "speaker.wave.3.fill")
+                                    .foregroundColor(.purple)
+                                    .font(.headline)
+                                
+                                Text("Audio & Haptics")
+                                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                                    .foregroundColor(.white)
+                                
+                                Spacer()
+                            }
+                            
+                            Toggle(isOn: $soundsEnabled) {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Sound Effects")
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundColor(.white)
+                                    Text("Play chimes, tap clicks, and game alerts.")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.white.opacity(0.5))
+                                }
+                            }
+                            .tint(.purple)
+                            
+                            Divider()
+                                .background(Color.white.opacity(0.12))
+                            
+                            Toggle(isOn: $hapticsEnabled) {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Vibration Feedback")
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundColor(.white)
+                                    Text("Trigger tactile feedback during gameplay events.")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(.white.opacity(0.5))
+                                }
+                            }
+                            .tint(.purple)
                         }
                         .padding()
                         .background(Color.white.opacity(0.04))
@@ -195,9 +246,8 @@ struct SettingsView: View {
                         )
                     }
                     .padding(.horizontal, 24)
+                    .padding(.bottom, 120) // Leave space for custom tab bar!
                 }
-                
-                Spacer()
             }
         }
         .preferredColorScheme(.dark)
@@ -222,10 +272,11 @@ struct SettingsView: View {
     }
     
     private func loadSavedTime() {
-        var components = DateComponents()
+        let calendar = Calendar.current
+        var components = calendar.dateComponents([.year, .month, .day], from: Date())
         components.hour = dailyChallengeHour
         components.minute = dailyChallengeMinute
-        if let savedDate = Calendar.current.date(from: components) {
+        if let savedDate = calendar.date(from: components) {
             challengeTime = savedDate
         }
     }
@@ -247,7 +298,7 @@ struct SettingsView: View {
         
         let content = UNMutableNotificationContent()
         content.title = "Daily Challenge is Ready! 🏆"
-        content.body = "Today's challenge is \(DailyChallengeHelper.todayChallengeMode)! Open PlayHub to play now!"
+        content.body = "Keep your streak alive! Open PlayHub to play today's Daily Challenge now!"
         content.sound = .default
         
         let calendar = Calendar.current

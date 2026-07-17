@@ -84,6 +84,7 @@ class AuthManager: ObservableObject {
         currentUser = nil
         UserDefaults.standard.removeObject(forKey: sessionKey)
         UserDefaults.standard.set("Guest", forKey: "savedPlayerName")
+        GameSessionManager.shared.loadSessions()
     }
     
     private func loginSession(_ account: UserAccount) {
@@ -93,14 +94,19 @@ class AuthManager: ObservableObject {
         }
         // Sync username for highscore history
         UserDefaults.standard.set(account.fullName, forKey: "savedPlayerName")
+        GameSessionManager.shared.loadSessions()
     }
     
-    private func getAccounts() -> [UserAccount] {
+    func getAllAccounts() -> [UserAccount] {
         guard let data = UserDefaults.standard.data(forKey: accountsKey),
               let list = try? JSONDecoder().decode([UserAccount].self, from: data) else {
             return []
         }
         return list
+    }
+    
+    private func getAccounts() -> [UserAccount] {
+        return getAllAccounts()
     }
     
     private func saveAccounts(_ accounts: [UserAccount]) {

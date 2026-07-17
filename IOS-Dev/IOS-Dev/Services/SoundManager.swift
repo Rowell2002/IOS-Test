@@ -6,6 +6,10 @@ class SoundManager {
     
     private init() {}
     
+    var isEnabled: Bool {
+        UserDefaults.standard.bool(forKey: "soundsEnabled") || UserDefaults.standard.object(forKey: "soundsEnabled") == nil
+    }
+    
     enum SoundType: SystemSoundID {
         case tap = 1104       // Tock click (perfect for quick taps)
         case correct = 1057   // Tink chime (positive response)
@@ -14,6 +18,7 @@ class SoundManager {
     }
     
     func play(_ sound: SoundType) {
+        guard isEnabled else { return }
         AudioServicesPlaySystemSound(sound.rawValue)
     }
 }

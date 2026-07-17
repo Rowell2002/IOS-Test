@@ -28,12 +28,12 @@ struct TapFrenzyGameView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("HOW TO PLAY")
                                 .font(.caption.bold())
-                                .foregroundColor(.red)
+                                .foregroundColor(Color(red: 255/255, green: 120/255, blue: 120/255))
                                 .tracking(2)
                             
                             Text("1. Tap the giant button as fast as you can.\n2. You have exactly 10 seconds.\n3. Rack up the highest score possible!")
                                 .font(.body)
-                                .foregroundColor(.white.opacity(0.8))
+                                .foregroundColor(.white)
                                 .lineSpacing(6)
                         }
                         .padding(24)
@@ -90,99 +90,107 @@ struct TapFrenzyGameView: View {
                     }
                 } else {
                     // Active Gameplay
-                    VStack(spacing: 24) {
+                    VStack {
                         Text("High Score: \(viewModel.highScore)")
                             .font(.title2.bold())
                             .foregroundStyle(.white)
-                            .padding(.top, 10)
+                            .padding(.top, 20)
+                        
+                        Spacer()
                         
                         if viewModel.timeLeft > 0 {
-                            Text("Pressed: \(viewModel.pressCount)")
-                                .font(.title)
-                                .foregroundStyle(.white)
-                                .padding(.top, 20)
-                            
-                            ZStack {
-                                Button(action: {
-                                    viewModel.buttonPressed()
-                                }) {
-                                    Text("Press")
-                                        .font(.largeTitle)
-                                        .frame(width: 200, height: 200)
-                                        .background(Color.red)
-                                        .foregroundStyle(.white)
-                                        .clipShape(Circle())
-                                        .shadow(color: .red.opacity(0.5), radius: 20, x: 0, y: 10)
-                                }
+                            VStack(spacing: 24) {
+                                Text("Pressed: \(viewModel.pressCount)")
+                                    .font(.title)
+                                    .foregroundStyle(.white)
                                 
-                                if let bubble = viewModel.activeBubble {
+                                ZStack {
                                     Button(action: {
-                                        viewModel.bubbleTapped()
+                                        viewModel.buttonPressed()
                                     }) {
-                                        Text("+\(bubble.value)")
-                                            .font(.title3.bold())
-                                            .foregroundColor(.white)
-                                            .frame(width: 65, height: 65)
-                                            .background(
-                                                RadialGradient(colors: [.yellow, .orange], center: .center, startRadius: 0, endRadius: 32)
-                                            )
+                                        Text("Press")
+                                            .font(.largeTitle)
+                                            .frame(width: 200, height: 200)
+                                            .background(Color.red)
+                                            .foregroundStyle(.white)
                                             .clipShape(Circle())
-                                            .shadow(color: .orange.opacity(0.6), radius: 10)
+                                            .shadow(color: .red.opacity(0.5), radius: 20, x: 0, y: 10)
                                     }
-                                    .offset(x: bubble.xOffset, y: bubble.yOffset)
-                                    .transition(.scale.combined(with: .opacity))
-                                    .animation(.spring(response: 0.3, dampingFraction: 0.6), value: viewModel.activeBubble)
+                                    
+                                    if let bubble = viewModel.activeBubble {
+                                        Button(action: {
+                                            viewModel.bubbleTapped()
+                                        }) {
+                                            Text("+\(bubble.value)")
+                                                .font(.title3.bold())
+                                                .foregroundColor(.white)
+                                                .frame(width: 65, height: 65)
+                                                .background(
+                                                    RadialGradient(colors: [.yellow, .orange], center: .center, startRadius: 0, endRadius: 32)
+                                                )
+                                                .clipShape(Circle())
+                                                .shadow(color: .orange.opacity(0.6), radius: 10)
+                                        }
+                                        .offset(x: bubble.xOffset, y: bubble.yOffset)
+                                        .transition(.scale.combined(with: .opacity))
+                                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: viewModel.activeBubble)
+                                    }
                                 }
                             }
+                            
+                            Spacer()
                             
                             Text("Time left: \(viewModel.timeLeft)")
                                 .font(.title)
                                 .foregroundStyle(.white)
+                                .padding(.bottom, 40)
                         } else {
-                            Text("Your pressed count: \(viewModel.pressCount)")
-                                .font(.title)
-                                .foregroundStyle(.white)
-                                .padding(.top, 50)
-                            
-                            HStack(spacing: 20) {
-                                Button("Replay") {
-                                    viewModel.replay()
-                                }
-                                .font(.title3.bold())
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 30)
-                                .padding(.vertical, 12)
-                                .background(Color.red)
-                                .cornerRadius(20)
+                            VStack(spacing: 24) {
+                                Text("Your pressed count: \(viewModel.pressCount)")
+                                    .font(.title)
+                                    .foregroundStyle(.white)
+                                    .padding(.top, 50)
                                 
-                                Button("Lobby") {
-                                    viewModel.replay()
-                                    isGameStarted = false
-                                }
-                                .font(.title3.bold())
-                                .foregroundColor(.white.opacity(0.8))
-                                .padding(.horizontal, 30)
-                                .padding(.vertical, 12)
-                                .background(Color.white.opacity(0.15))
-                                .cornerRadius(20)
-                            }
-                            
-                            ShareLink(item: "I just scored \(viewModel.pressCount) on Tap Frenzy — beat that") {
-                                Label("Share Score", systemImage: "square.and.arrow.up")
-                                    .font(.headline.bold())
+                                HStack(spacing: 20) {
+                                    Button("Replay") {
+                                        viewModel.replay()
+                                    }
+                                    .font(.title3.bold())
                                     .foregroundColor(.white)
                                     .padding(.horizontal, 30)
                                     .padding(.vertical, 12)
-                                    .background(Color.red.opacity(0.2))
+                                    .background(Color.red)
                                     .cornerRadius(20)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 20)
-                                            .stroke(Color.red.opacity(0.5), lineWidth: 1)
-                                    )
+                                    
+                                    Button("Lobby") {
+                                        viewModel.replay()
+                                        isGameStarted = false
+                                    }
+                                    .font(.title3.bold())
+                                    .foregroundColor(.white.opacity(0.8))
+                                    .padding(.horizontal, 30)
+                                    .padding(.vertical, 12)
+                                    .background(Color.white.opacity(0.15))
+                                    .cornerRadius(20)
+                                }
+                                
+                                ShareLink(item: "I just scored \(viewModel.pressCount) on Tap Frenzy — beat that") {
+                                    Label("Share Score", systemImage: "square.and.arrow.up")
+                                        .font(.headline.bold())
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 30)
+                                        .padding(.vertical, 12)
+                                        .background(Color.red.opacity(0.2))
+                                        .cornerRadius(20)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 20)
+                                                .stroke(Color.red.opacity(0.5), lineWidth: 1)
+                                        )
+                                }
+                                .padding(.top, 12)
                             }
-                            .padding(.top, 12)
+                            Spacer()
                         }
-                        Spacer()
                     }
                 }
             }

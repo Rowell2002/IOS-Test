@@ -72,53 +72,53 @@ struct MapView: View {
             
             // UI Overlay
             VStack {
-                // Customized Header Card
+                // Integrated Header & Filters Card
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("GAME MAP")
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
-                        .foregroundColor(.purple)
-                        .tracking(3)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("GAME MAP")
+                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                            .foregroundColor(.purple)
+                            .tracking(3)
+                        
+                        Text("Session Pins")
+                            .font(.system(size: 26, weight: .bold, design: .rounded))
+                            .foregroundColor(.white)
+                    }
                     
-                    Text("Session Pins")
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
-                }
-                .padding()
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(.ultraThinMaterial)
-                .cornerRadius(16)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.white.opacity(0.12), lineWidth: 1)
-                )
-                .padding(.horizontal)
-                .padding(.top, 16)
-                
-                // Sliding Filters Control below Header
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 10) {
-                        ForEach(["All", "Tap Frenzy", "Light It Up", "Quiz Rush"], id: \.self) { filter in
-                            Button(action: {
-                                selectedFilter = filter
-                                HapticManager.shared.impact(style: .light)
-                            }) {
-                                Text(filter)
-                                    .font(.system(size: 13, weight: .bold, design: .rounded))
-                                    .foregroundColor(selectedFilter == filter ? Color.black : Color.white.opacity(0.8))
-                                    .padding(.horizontal, 14)
-                                    .padding(.vertical, 7)
-                                    .background(selectedFilter == filter ? Color.purple : Color.white.opacity(0.08))
-                                    .cornerRadius(10)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(selectedFilter == filter ? Color.purple : Color.white.opacity(0.12), lineWidth: 1)
-                                    )
+                    // Sliding Filters Control inside Card
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(["All", "Tap Frenzy", "Light It Up", "Quiz Rush"], id: \.self) { filter in
+                                Button(action: {
+                                    selectedFilter = filter
+                                    HapticManager.shared.impact(style: .light)
+                                }) {
+                                    Text(filter)
+                                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                                        .foregroundColor(selectedFilter == filter ? Color.black : Color.white.opacity(0.8))
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(selectedFilter == filter ? Color.purple : Color.white.opacity(0.08))
+                                        .cornerRadius(8)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .stroke(selectedFilter == filter ? Color.purple : Color.white.opacity(0.12), lineWidth: 1)
+                                        )
+                                }
                             }
                         }
                     }
-                    .padding(.horizontal, 20)
                 }
-                .padding(.vertical, 4)
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(.ultraThinMaterial)
+                .cornerRadius(18)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                )
+                .padding(.horizontal)
+                .padding(.top, 4)
                 
                 Spacer()
                 

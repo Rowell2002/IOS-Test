@@ -29,12 +29,12 @@ struct QuizRushGameView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("HOW TO PLAY")
                                 .font(.caption.bold())
-                                .foregroundColor(.purple)
+                                .foregroundColor(Color(red: 220/255, green: 170/255, blue: 255/255))
                                 .tracking(2)
                             
                             Text("1. Answer 10 multiple-choice trivia questions.\n2. Correct answers add points & build a streak.\n3. Incorrect answers apply a small penalty.\n4. Consecutive streaks award bonus points!")
                                 .font(.body)
-                                .foregroundColor(.white.opacity(0.8))
+                                .foregroundColor(.white)
                                 .lineSpacing(6)
                         }
                         .padding(24)
@@ -46,14 +46,13 @@ struct QuizRushGameView: View {
                         )
                         .padding(.horizontal, 20)
                         
-
                         // Category Selection Dropdown
                         HStack {
                             Image(systemName: "list.bullet")
-                                .foregroundColor(.purple)
+                                .foregroundColor(Color(red: 220/255, green: 170/255, blue: 255/255))
                             
                             Text("Genre:")
-                                .foregroundColor(.white.opacity(0.8))
+                                .foregroundColor(.white.opacity(0.9))
                                 .font(.headline)
                             
                             Spacer()
@@ -64,7 +63,7 @@ struct QuizRushGameView: View {
                                         .tag(category.id)
                                 }
                             }
-                            .tint(.purple)
+                            .tint(Color(red: 220/255, green: 170/255, blue: 255/255))
                             .pickerStyle(.menu)
                         }
                         .padding()
@@ -80,7 +79,7 @@ struct QuizRushGameView: View {
                         VStack(spacing: 8) {
                             Text("DIFFICULTY")
                                 .font(.caption.bold())
-                                .foregroundColor(.purple.opacity(0.8))
+                                .foregroundColor(Color(red: 220/255, green: 170/255, blue: 255/255))
                                 .tracking(1)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             
