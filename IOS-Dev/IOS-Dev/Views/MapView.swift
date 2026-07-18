@@ -2,18 +2,78 @@ import SwiftUI
 import MapKit
 
 struct MapView: View {
+    struct MapSession: Identifiable, Hashable {
+        let id: UUID
+        let gameMode: String
+        let score: Int
+        let date: Date
+        let latitude: Double
+        let longitude: Double
+        let playerName: String
+        let playerAvatar: String
+        let isCurrentUser: Bool
+    }
+    
     @ObservedObject var sessionManager = GameSessionManager.shared
-    @State private var selectedSession: GameSession? = nil
+    @State private var selectedSession: MapSession? = nil
     @State private var position: MapCameraPosition = .automatic
     
     // Filter State
     @State private var selectedFilter: String = "All"
     
-    var sessionsWithLocation: [GameSession] {
-        sessionManager.sessions.filter { $0.latitude != nil && $0.longitude != nil }
+    var sessionsWithLocation: [MapSession] {
+        var allMapSessions: [MapSession] = []
+        let accounts = AuthManager.shared.getAllAccounts()
+        let currentUser = AuthManager.shared.currentUser
+        
+        for account in accounts {
+            let key = "gameSessions_\(account.email)"
+            if let data = UserDefaults.standard.data(forKey: key),
+               let sessions = try? JSONDecoder().decode([GameSession].self, from: data) {
+                for s in sessions {
+                    if let lat = s.latitude, let lon = s.longitude {
+                        allMapSessions.append(MapSession(
+                            id: s.id,
+                            gameMode: s.gameMode,
+                            score: s.score,
+                            date: s.date,
+                            latitude: lat,
+                            longitude: lon,
+                            playerName: account.fullName,
+                            playerAvatar: account.avatar ?? "👾",
+                            isCurrentUser: account.email == currentUser?.email
+                        ))
+                    }
+                }
+            }
+        }
+        
+        if let currentUser = currentUser, !accounts.contains(where: { $0.email == currentUser.email }) {
+            let key = "gameSessions_\(currentUser.email)"
+            if let data = UserDefaults.standard.data(forKey: key),
+               let sessions = try? JSONDecoder().decode([GameSession].self, from: data) {
+                for s in sessions {
+                    if let lat = s.latitude, let lon = s.longitude {
+                        allMapSessions.append(MapSession(
+                            id: s.id,
+                            gameMode: s.gameMode,
+                            score: s.score,
+                            date: s.date,
+                            latitude: lat,
+                            longitude: lon,
+                            playerName: currentUser.fullName,
+                            playerAvatar: currentUser.avatar ?? "👾",
+                            isCurrentUser: true
+                        ))
+                    }
+                }
+            }
+        }
+        
+        return allMapSessions
     }
     
-    var filteredSessions: [GameSession] {
+    var filteredSessions: [MapSession] {
         let items = sessionsWithLocation
         if selectedFilter == "All" {
             return items
@@ -22,7 +82,7 @@ struct MapView: View {
     }
     
     // Find the session with the absolute highest score
-    var highestScoreSession: GameSession? {
+    var highestScoreSession: MapSession? {
         sessionsWithLocation.max(by: { $0.score < $1.score })
     }
     
@@ -32,7 +92,7 @@ struct MapView: View {
                 ForEach(filteredSessions) { session in
                     let isHighest = session.id == highestScoreSession?.id
                     
-                    Annotation(session.gameMode, coordinate: CLLocationCoordinate2D(latitude: session.latitude!, longitude: session.longitude!)) {
+                    Annotation(session.gameMode, coordinate: CLLocationCoordinate2D(latitude: session.latitude, longitude: session.longitude)) {
                         VStack(spacing: 0) {
                             HStack(spacing: 4) {
                                 if isHighest {
@@ -140,10 +200,8 @@ struct MapView: View {
     }
     
     private func updateCameraPosition() {
-        if let lastSession = sessionsWithLocation.first,
-           let lat = lastSession.latitude,
-           let lon = lastSession.longitude {
-            let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+        if let lastSession = sessionsWithLocation.first {
+            let coordinate = CLLocationCoordinate2D(latitude: lastSession.latitude, longitude: lastSession.longitude)
             position = .camera(MapCamera(centerCoordinate: coordinate, distance: 5000))
         } else {
             // Default position (San Francisco / Apple HQ)
@@ -169,7 +227,7 @@ struct MapView: View {
         }
     }
     
-    private func sessionDetailCard(session: GameSession) -> some View {
+    private func sessionDetailCard(session: MapSession) -> some View {
         let isHighest = session.id == highestScoreSession?.id
         
         return HStack(spacing: 16) {
@@ -178,9 +236,8 @@ struct MapView: View {
                     .fill(isHighest ? Color.yellow.opacity(0.15) : colorForMode(session.gameMode).opacity(0.15))
                     .frame(width: 48, height: 48)
                 
-                Image(systemName: isHighest ? "crown.fill" : iconForMode(session.gameMode))
-                    .foregroundColor(isHighest ? .yellow : colorForMode(session.gameMode))
-                    .font(.title3)
+                Text(session.playerAvatar)
+                    .font(.system(size: 24))
             }
             
             VStack(alignment: .leading, spacing: 4) {
@@ -200,13 +257,17 @@ struct MapView: View {
                     }
                 }
                 
-                Text(session.date, style: .date)
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.6))
+                Text("Played by \(session.playerName)")
+                    .font(.caption.bold())
+                    .foregroundColor(session.isCurrentUser ? Color(red: 220/255, green: 170/255, blue: 255/255) : .white.opacity(0.6))
                 
-                Text(session.date, style: .time)
-                    .font(.caption)
-                    .foregroundColor(.white.opacity(0.4))
+                HStack(spacing: 6) {
+                    Text(session.date, style: .date)
+                    Text("•")
+                    Text(session.date, style: .time)
+                }
+                .font(.system(size: 10))
+                .foregroundColor(.white.opacity(0.4))
             }
             
             Spacer()
