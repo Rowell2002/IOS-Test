@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MainTabView: View {
     @State private var selectedTab: Tab = .home
+    @Environment(\.colorScheme) var colorScheme
     
     enum Tab: Hashable {
         case home
@@ -14,7 +15,8 @@ struct MainTabView: View {
     
     var body: some View {
         ZStack(alignment: .bottom) {
-            Color.black.ignoresSafeArea()
+            (colorScheme == .light ? Color(red: 245/255, green: 245/255, blue: 250/255) : Color.black)
+                .ignoresSafeArea()
             
             TabView(selection: $selectedTab) {
                 NavigationStack {
@@ -49,17 +51,17 @@ struct MainTabView: View {
             }
             .animation(.easeInOut(duration: 0.25), value: tabBarManager.isHidden)
         }
-        .preferredColorScheme(.dark)
     }
 }
 
 struct CustomTabBar: View {
     @Binding var selectedTab: MainTabView.Tab
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         VStack(spacing: 0) {
             Divider()
-                .background(Color.white.opacity(0.12))
+                .background(Color.primary.opacity(0.12))
             
             HStack {
                 tabButton(for: .home, title: "Home", iconName: "house.fill")
@@ -73,7 +75,7 @@ struct CustomTabBar: View {
             .padding(.horizontal, 24)
             .padding(.top, 10)
             .padding(.bottom, 12)
-            .background(Color(red: 10/255, green: 14/255, blue: 23/255))
+            .background(colorScheme == .light ? Color(red: 240/255, green: 242/255, blue: 246/255) : Color(red: 10/255, green: 14/255, blue: 23/255))
         }
     }
     
@@ -87,12 +89,12 @@ struct CustomTabBar: View {
                 if selectedTab == tab {
                     Image(systemName: iconName)
                         .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(.white)
+                        .foregroundColor(colorScheme == .light ? .purple : .white)
                         .padding(.vertical, 8)
                         .padding(.horizontal, 22)
                         .background(
                             Capsule()
-                                .fill(Color(red: 26/255, green: 77/255, blue: 46/255))
+                                .fill(colorScheme == .light ? Color.purple.opacity(0.15) : Color(red: 26/255, green: 77/255, blue: 46/255))
                         )
                 } else {
                     Image(systemName: iconName)
@@ -104,7 +106,7 @@ struct CustomTabBar: View {
                 
                 Text(title)
                     .font(.system(size: 11, weight: .semibold, design: .rounded))
-                    .foregroundColor(selectedTab == tab ? Color(red: 52/255, green: 199/255, blue: 89/255) : .gray)
+                    .foregroundColor(selectedTab == tab ? (colorScheme == .light ? Color.purple : Color(red: 52/255, green: 199/255, blue: 89/255)) : .gray)
             }
         }
         .buttonStyle(PlainButtonStyle())
