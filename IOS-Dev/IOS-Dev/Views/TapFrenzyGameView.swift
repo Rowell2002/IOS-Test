@@ -91,59 +91,63 @@ struct TapFrenzyGameView: View {
                 } else {
                     // Active Gameplay
                     VStack {
-                        Text("High Score: \(viewModel.highScore)")
-                            .font(.title2.bold())
-                            .foregroundStyle(.white)
-                            .padding(.top, 20)
-                        
-                        Spacer()
+                        // Top Header Stack (High Score & Pressed count moved up)
+                        VStack(spacing: 6) {
+                            Text("High Score: \(viewModel.highScore)")
+                                .font(.subheadline.bold())
+                                .foregroundColor(.white.opacity(0.75))
+                            
+                            Text("Pressed: \(viewModel.pressCount)")
+                                .font(.system(size: 32, weight: .black, design: .rounded))
+                                .foregroundStyle(.white)
+                        }
+                        .padding(.top, 10)
                         
                         if viewModel.timeLeft > 0 {
-                            VStack(spacing: 24) {
-                                Text("Pressed: \(viewModel.pressCount)")
-                                    .font(.title)
-                                    .foregroundStyle(.white)
-                                
-                                ZStack {
-                                    Button(action: {
+                            // Main Game Play Area with moving & shrinking target button
+                            ZStack {
+                                // Moving Red Target Button
+                                Button(action: {
+                                    withAnimation(.spring(response: 0.25, dampingFraction: 0.65)) {
                                         viewModel.buttonPressed()
+                                    }
+                                }) {
+                                    Text("Press")
+                                        .font(viewModel.buttonSize < 120 ? .title3.bold() : .largeTitle.bold())
+                                        .frame(width: viewModel.buttonSize, height: viewModel.buttonSize)
+                                        .background(Color.red)
+                                        .foregroundStyle(.white)
+                                        .clipShape(Circle())
+                                        .shadow(color: .red.opacity(0.6), radius: 15, x: 0, y: 5)
+                                }
+                                .offset(x: viewModel.buttonXOffset, y: viewModel.buttonYOffset)
+                                
+                                // Bonus +3 Bubble
+                                if let bubble = viewModel.activeBubble {
+                                    Button(action: {
+                                        viewModel.bubbleTapped()
                                     }) {
-                                        Text("Press")
-                                            .font(.largeTitle)
-                                            .frame(width: 200, height: 200)
-                                            .background(Color.red)
-                                            .foregroundStyle(.white)
+                                        Text("+\(bubble.value)")
+                                            .font(.title3.bold())
+                                            .foregroundColor(.white)
+                                            .frame(width: 65, height: 65)
+                                            .background(
+                                                RadialGradient(colors: [.yellow, .orange], center: .center, startRadius: 0, endRadius: 32)
+                                            )
                                             .clipShape(Circle())
-                                            .shadow(color: .red.opacity(0.5), radius: 20, x: 0, y: 10)
+                                            .shadow(color: .orange.opacity(0.6), radius: 10)
                                     }
-                                    
-                                    if let bubble = viewModel.activeBubble {
-                                        Button(action: {
-                                            viewModel.bubbleTapped()
-                                        }) {
-                                            Text("+\(bubble.value)")
-                                                .font(.title3.bold())
-                                                .foregroundColor(.white)
-                                                .frame(width: 65, height: 65)
-                                                .background(
-                                                    RadialGradient(colors: [.yellow, .orange], center: .center, startRadius: 0, endRadius: 32)
-                                                )
-                                                .clipShape(Circle())
-                                                .shadow(color: .orange.opacity(0.6), radius: 10)
-                                        }
-                                        .offset(x: bubble.xOffset, y: bubble.yOffset)
-                                        .transition(.scale.combined(with: .opacity))
-                                        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: viewModel.activeBubble)
-                                    }
+                                    .offset(x: bubble.xOffset, y: bubble.yOffset)
+                                    .transition(.scale.combined(with: .opacity))
+                                    .animation(.spring(response: 0.3, dampingFraction: 0.6), value: viewModel.activeBubble)
                                 }
                             }
-                            
-                            Spacer()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                             
                             Text("Time left: \(viewModel.timeLeft)")
-                                .font(.title)
+                                .font(.title.bold())
                                 .foregroundStyle(.white)
-                                .padding(.bottom, 40)
+                                .padding(.bottom, 30)
                         } else {
                             VStack(spacing: 24) {
                                 Text("Your pressed count: \(viewModel.pressCount)")
