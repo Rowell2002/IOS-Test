@@ -54,15 +54,15 @@
 ## 🛠️ Tech Stack & Frameworks
 
 | Layer / Feature | Technology |
-| ---------
-| **Language** | Swift 5.9 |
-| **User Interface** | SwiftUI |
-| **Architecture** | MVVM (Model-View-ViewModel) |
-| **Charts & Analytics** | Swift Charts |
-| **Mapping & Location** | MapKit, CoreLocation |
-| **Notifications** | UserNotifications Framework |
-| **Audio & Haptics** | AVFoundation, UIKit (UIImpactFeedbackGenerator) |
-| **Persistence** | `UserDefaults` + JSON Serialization |
+| :--- | :--- | 
+| **Language** -> Swift 5.9 |
+| **User Interface** -> SwiftUI |
+| **Architecture** -> MVVM (Model-View-ViewModel) |
+| **Charts & Analytics** -> Swift Charts |
+| **Mapping & Location** -> MapKit, CoreLocation |
+| **Notifications** -> UserNotifications Framework |
+| **Audio & Haptics** -> AVFoundation, UIKit (UIImpactFeedbackGenerator) |
+| **Persistence** -> `UserDefaults` + JSON Serialization |
 
 ---
 
