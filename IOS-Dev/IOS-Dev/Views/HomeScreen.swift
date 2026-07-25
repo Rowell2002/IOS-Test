@@ -5,20 +5,22 @@ struct HomeScreen: View {
     @State private var streak: Int = 0
     @StateObject private var authManager = AuthManager.shared
     @State private var showProfileSheet = false
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         ZStack {
-            // Background Layer: Sleek Dark theme
-            Color.black.ignoresSafeArea()
+            // Background Layer
+            (colorScheme == .light ? Color(red: 245/255, green: 245/255, blue: 250/255) : Color.black)
+                .ignoresSafeArea()
             
             // Grid Background
             GridBackground()
                 .ignoresSafeArea()
             
             // Radial Glows
-            RadialGradient(colors: [.purple.opacity(0.18), .clear], center: .topTrailing, startRadius: 10, endRadius: 350)
+            RadialGradient(colors: [.purple.opacity(colorScheme == .light ? 0.08 : 0.18), .clear], center: .topTrailing, startRadius: 10, endRadius: 350)
                 .ignoresSafeArea()
-            RadialGradient(colors: [.blue.opacity(0.15), .clear], center: .bottomLeading, startRadius: 10, endRadius: 450)
+            RadialGradient(colors: [.blue.opacity(colorScheme == .light ? 0.06 : 0.15), .clear], center: .bottomLeading, startRadius: 10, endRadius: 450)
                 .ignoresSafeArea()
             
             ScrollView {
@@ -29,11 +31,11 @@ struct HomeScreen: View {
                         HStack(spacing: 8) {
                             Image(systemName: "gamecontroller.fill")
                                 .font(.system(size: 24))
-                                .foregroundColor(Color(red: 200/255, green: 160/255, blue: 255/255))
+                                .foregroundColor(colorScheme == .light ? Color.purple : Color(red: 200/255, green: 160/255, blue: 255/255))
                             
                             Text("PlayHub")
                                 .font(.system(size: 26, weight: .black, design: .rounded))
-                                .foregroundColor(Color(red: 200/255, green: 160/255, blue: 255/255))
+                                .foregroundColor(colorScheme == .light ? Color.purple : Color(red: 200/255, green: 160/255, blue: 255/255))
                         }
                         
                         Spacer()
@@ -63,11 +65,11 @@ struct HomeScreen: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Jump In")
                             .font(.system(size: 38, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .foregroundColor(colorScheme == .light ? .black : .white)
                         
                         Text("Select a mode to start playing.")
                             .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.white.opacity(0.7))
+                            .foregroundColor(colorScheme == .light ? Color.black.opacity(0.65) : Color.white.opacity(0.7))
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 24)
@@ -161,28 +163,29 @@ struct GameMenuCard<Destination: View>: View {
     let themeColor: Color
     let iconBgColor: Color
     let destination: Destination
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         NavigationLink(destination: destination) {
             ZStack(alignment: .trailing) {
                 // Background
                 RoundedRectangle(cornerRadius: 20)
-                    .fill(Color(red: 18/255, green: 22/255, blue: 32/255))
+                    .fill(colorScheme == .light ? Color.white : Color(red: 18/255, green: 22/255, blue: 32/255))
                     .overlay(
                         RoundedRectangle(cornerRadius: 20)
-                            .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                            .stroke(colorScheme == .light ? Color.black.opacity(0.08) : Color.white.opacity(0.08), lineWidth: 1)
                     )
                 
                 // Watermark watermark & chevron on the right side
                 HStack(spacing: 4) {
                     Image(systemName: watermarkName)
                         .font(.system(size: 80, weight: .bold))
-                        .foregroundColor(themeColor.opacity(0.08))
+                        .foregroundColor(themeColor.opacity(colorScheme == .light ? 0.12 : 0.08))
                         .scaleEffect(x: -1, y: 1) // Flip watermark to match style
                     
                     Image(systemName: "chevron.right")
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(themeColor.opacity(0.4))
+                        .foregroundColor(themeColor.opacity(colorScheme == .light ? 0.7 : 0.4))
                 }
                 .padding(.trailing, 24)
                 
@@ -191,7 +194,7 @@ struct GameMenuCard<Destination: View>: View {
                     // Icon block
                     ZStack {
                         RoundedRectangle(cornerRadius: 14)
-                            .fill(iconBgColor)
+                            .fill(colorScheme == .light ? themeColor.opacity(0.12) : iconBgColor)
                             .frame(width: 50, height: 50)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 14)
@@ -206,7 +209,7 @@ struct GameMenuCard<Destination: View>: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(title)
                             .font(.system(size: 20, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .foregroundColor(colorScheme == .light ? .black : .white)
                         
                         Text(subtitle)
                             .font(.system(size: 14, weight: .semibold))
@@ -218,13 +221,15 @@ struct GameMenuCard<Destination: View>: View {
                 .padding(.vertical, 20)
                 .padding(.horizontal, 18)
             }
-            .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
+            .shadow(color: colorScheme == .light ? Color.black.opacity(0.05) : Color.black.opacity(0.3), radius: 8, x: 0, y: 4)
         }
         .buttonStyle(PlainButtonStyle())
     }
 }
 
 struct GridBackground: View {
+    @Environment(\.colorScheme) var colorScheme
+    
     var body: some View {
         GeometryReader { geometry in
             Path { path in
@@ -245,61 +250,66 @@ struct GridBackground: View {
                     path.addLine(to: CGPoint(x: width, y: y))
                 }
             }
-            .stroke(Color.white.opacity(0.035), lineWidth: 0.8)
+            .stroke(colorScheme == .light ? Color.black.opacity(0.04) : Color.white.opacity(0.035), lineWidth: 0.8)
         }
     }
 }
 
 struct DailyChallengeBannerContent: View {
+    @Environment(\.colorScheme) var colorScheme
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Label("DAILY CHALLENGE", systemImage: "trophy.fill")
                     .font(.system(size: 12, weight: .bold, design: .rounded))
-                    .foregroundColor(.yellow)
+                    .foregroundColor(colorScheme == .light ? Color(red: 180/255, green: 130/255, blue: 0/255) : .yellow)
                     .tracking(1.5)
                 
                 Spacer()
                 
                 Text("PLAY NOW")
                     .font(.system(size: 11, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(colorScheme == .light ? .purple : .white)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
-                    .background(Color.yellow.opacity(0.3))
+                    .background(colorScheme == .light ? Color.purple.opacity(0.15) : Color.yellow.opacity(0.3))
                     .cornerRadius(6)
             }
             
             Text(DailyChallengeHelper.todayChallengeMode)
                 .font(.system(size: 24, weight: .bold, design: .rounded))
-                .foregroundColor(.white)
+                .foregroundColor(colorScheme == .light ? .black : .white)
             
             Text("Complete today's challenge to earn maximum points and keep your streak alive!")
                 .font(.system(size: 13))
-                .foregroundColor(.white.opacity(0.7))
+                .foregroundColor(colorScheme == .light ? Color.black.opacity(0.65) : Color.white.opacity(0.7))
                 .lineLimit(2)
                 .multilineTextAlignment(.leading)
         }
         .padding(20)
         .background(
-            LinearGradient(colors: [Color(red: 45/255, green: 30/255, blue: 70/255), Color(red: 25/255, green: 20/255, blue: 45/255)], startPoint: .topLeading, endPoint: .bottomTrailing)
+            colorScheme == .light
+            ? LinearGradient(colors: [Color.white, Color(red: 245/255, green: 240/255, blue: 255/255)], startPoint: .topLeading, endPoint: .bottomTrailing)
+            : LinearGradient(colors: [Color(red: 45/255, green: 30/255, blue: 70/255), Color(red: 25/255, green: 20/255, blue: 45/255)], startPoint: .topLeading, endPoint: .bottomTrailing)
         )
         .cornerRadius(22)
         .overlay(
             RoundedRectangle(cornerRadius: 22)
                 .stroke(
-                    LinearGradient(colors: [.yellow, .purple], startPoint: .topLeading, endPoint: .bottomTrailing).opacity(0.4),
+                    LinearGradient(colors: [.purple.opacity(0.5), .blue.opacity(0.3)], startPoint: .topLeading, endPoint: .bottomTrailing),
                     lineWidth: 1.5
                 )
         )
         .padding(.horizontal, 20)
-        .shadow(color: .purple.opacity(0.2), radius: 10, x: 0, y: 5)
+        .shadow(color: colorScheme == .light ? Color.purple.opacity(0.08) : Color.purple.opacity(0.2), radius: 10, x: 0, y: 5)
     }
 }
 
 // MARK: - Streak Banner View
 struct StreakBannerView: View {
     let streak: Int
+    @Environment(\.colorScheme) var colorScheme
     
     private var flameColor: Color {
         switch streak {
@@ -337,11 +347,11 @@ struct StreakBannerView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(streakLabel)
                     .font(.system(size: 17, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(colorScheme == .light ? .black : .white)
                 
                 Text("Keep going! Complete today's challenge to extend your streak.")
                     .font(.system(size: 12))
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(colorScheme == .light ? Color.black.opacity(0.6) : Color.white.opacity(0.6))
                     .lineLimit(1)
             }
             
@@ -363,7 +373,7 @@ struct StreakBannerView: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 18)
-                .fill(Color(red: 18/255, green: 14/255, blue: 10/255))
+                .fill(colorScheme == .light ? Color.white : Color(red: 18/255, green: 14/255, blue: 10/255))
                 .overlay(
                     RoundedRectangle(cornerRadius: 18)
                         .stroke(
@@ -372,13 +382,14 @@ struct StreakBannerView: View {
                         )
                 )
         )
-        .shadow(color: flameColor.opacity(0.15), radius: 8, x: 0, y: 4)
+        .shadow(color: flameColor.opacity(colorScheme == .light ? 0.08 : 0.15), radius: 8, x: 0, y: 4)
     }
 }
 
 // MARK: - Profile Edit View
 struct ProfileEditView: View {
     @Environment(\.dismiss) var dismiss
+    @Environment(\.colorScheme) var colorScheme
     @StateObject private var authManager = AuthManager.shared
     
     @State private var fullName = ""
@@ -389,14 +400,14 @@ struct ProfileEditView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.black.ignoresSafeArea()
+                (colorScheme == .light ? Color(red: 245/255, green: 245/255, blue: 250/255) : Color.black).ignoresSafeArea()
                 
                 GridBackground().ignoresSafeArea()
                 
                 VStack(spacing: 28) {
                     Text("Edit Profile")
                         .font(.system(size: 28, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .foregroundColor(colorScheme == .light ? .black : .white)
                         .padding(.top, 20)
                     
                     ZStack {
@@ -410,13 +421,13 @@ struct ProfileEditView: View {
                     }
                     .overlay(
                         Circle()
-                            .stroke(Color.white.opacity(0.15), lineWidth: 2)
+                            .stroke(colorScheme == .light ? Color.black.opacity(0.15) : Color.white.opacity(0.15), lineWidth: 2)
                     )
                     
                     VStack(alignment: .leading, spacing: 10) {
                         Text("SELECT AVATAR")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(colorScheme == .light ? Color.black.opacity(0.6) : Color.white.opacity(0.5))
                             .tracking(1.5)
                         
                         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 6), spacing: 12) {
@@ -428,11 +439,11 @@ struct ProfileEditView: View {
                                     Text(avatar)
                                         .font(.system(size: 30))
                                         .frame(width: 50, height: 50)
-                                        .background(selectedAvatar == avatar ? Color.purple.opacity(0.2) : Color.white.opacity(0.04))
+                                        .background(selectedAvatar == avatar ? Color.purple.opacity(0.2) : (colorScheme == .light ? Color.white : Color.white.opacity(0.04)))
                                         .cornerRadius(12)
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 12)
-                                                .stroke(selectedAvatar == avatar ? Color.purple : Color.white.opacity(0.08), lineWidth: 1.5)
+                                                .stroke(selectedAvatar == avatar ? Color.purple : (colorScheme == .light ? Color.black.opacity(0.1) : Color.white.opacity(0.08)), lineWidth: 1.5)
                                         )
                                 }
                             }
@@ -443,24 +454,24 @@ struct ProfileEditView: View {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("FULL NAME")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.white.opacity(0.5))
+                            .foregroundColor(colorScheme == .light ? Color.black.opacity(0.6) : Color.white.opacity(0.5))
                             .tracking(1.5)
                         
                         HStack(spacing: 12) {
                             Image(systemName: "person.fill")
-                                .foregroundColor(.white.opacity(0.4))
+                                .foregroundColor(colorScheme == .light ? Color.black.opacity(0.4) : Color.white.opacity(0.4))
                             
-                            TextField("", text: $fullName, prompt: Text("Enter your full name").foregroundColor(.white.opacity(0.25)))
-                                .foregroundColor(.white)
+                            TextField("", text: $fullName, prompt: Text("Enter your full name").foregroundColor(colorScheme == .light ? Color.black.opacity(0.3) : Color.white.opacity(0.25)))
+                                .foregroundColor(colorScheme == .light ? .black : .white)
                                 .font(.system(size: 16, weight: .semibold))
                         }
                         .padding(.horizontal, 16)
                         .padding(.vertical, 14)
-                        .background(Color.white.opacity(0.035))
+                        .background(colorScheme == .light ? Color.white : Color.white.opacity(0.035))
                         .cornerRadius(12)
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                                .stroke(colorScheme == .light ? Color.black.opacity(0.1) : Color.white.opacity(0.08), lineWidth: 1)
                         )
                     }
                     .padding(.horizontal, 24)
@@ -472,10 +483,10 @@ struct ProfileEditView: View {
                             dismiss()
                         }
                         .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .foregroundColor(colorScheme == .light ? .black : .white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 15)
-                        .background(Color.white.opacity(0.1))
+                        .background(colorScheme == .light ? Color.black.opacity(0.06) : Color.white.opacity(0.1))
                         .cornerRadius(14)
                         
                         Button("Save") {

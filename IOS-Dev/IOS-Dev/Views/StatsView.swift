@@ -11,6 +11,7 @@ struct LeaderboardPlayer: Identifiable, Equatable {
 
 struct StatsView: View {
     @ObservedObject var sessionManager = GameSessionManager.shared
+    @Environment(\.colorScheme) var colorScheme
     
     @State private var selectedGameFilter: String = "All"
     
@@ -131,12 +132,13 @@ struct StatsView: View {
     
     var body: some View {
         ZStack {
-            // Dark elegant background
-            Color.black.ignoresSafeArea()
-            
-            RadialGradient(colors: [.purple.opacity(0.15), .clear], center: .topTrailing, startRadius: 10, endRadius: 350)
+            // Background
+            (colorScheme == .light ? Color(red: 245/255, green: 245/255, blue: 250/255) : Color.black)
                 .ignoresSafeArea()
-            RadialGradient(colors: [.blue.opacity(0.12), .clear], center: .bottomLeading, startRadius: 10, endRadius: 450)
+            
+            RadialGradient(colors: [.purple.opacity(colorScheme == .light ? 0.08 : 0.15), .clear], center: .topTrailing, startRadius: 10, endRadius: 350)
+                .ignoresSafeArea()
+            RadialGradient(colors: [.blue.opacity(colorScheme == .light ? 0.06 : 0.12), .clear], center: .bottomLeading, startRadius: 10, endRadius: 450)
                 .ignoresSafeArea()
             
             ScrollView {
@@ -150,7 +152,7 @@ struct StatsView: View {
                         
                         Text("Stats & Analytics")
                             .font(.system(size: 32, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .foregroundColor(colorScheme == .light ? .black : .white)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 24)
@@ -173,12 +175,11 @@ struct StatsView: View {
                         )
                     }
                     .padding(.horizontal, 24)
-                    
-                    // Personal Bests Section
+                             // Personal Bests Section
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Personal Bests")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .foregroundColor(colorScheme == .light ? .black : .white)
                             .padding(.horizontal, 24)
                         
                         VStack(spacing: 12) {
@@ -193,7 +194,7 @@ struct StatsView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Performance Progress")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .foregroundColor(colorScheme == .light ? .black : .white)
                             .padding(.horizontal, 24)
                         
                         VStack(spacing: 20) {
@@ -208,7 +209,7 @@ struct StatsView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Global Leaderboard")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .foregroundColor(colorScheme == .light ? .black : .white)
                             .padding(.horizontal, 24)
                         
                         VStack(spacing: 10) {
@@ -223,7 +224,7 @@ struct StatsView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("All Players' Score History")
                             .font(.system(size: 18, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .foregroundColor(colorScheme == .light ? .black : .white)
                             .padding(.horizontal, 24)
                         
                         // Game mode picker chips
@@ -236,20 +237,20 @@ struct StatsView: View {
                                     }) {
                                         Text(filter)
                                             .font(.system(size: 12, weight: .bold, design: .rounded))
-                                            .foregroundColor(selectedGameFilter == filter ? Color.black : Color.white.opacity(0.8))
+                                            .foregroundColor(selectedGameFilter == filter ? (colorScheme == .light ? .white : .black) : (colorScheme == .light ? .black : .white.opacity(0.8)))
                                             .padding(.horizontal, 12)
                                             .padding(.vertical, 6)
-                                            .background(selectedGameFilter == filter ? Color.purple : Color.white.opacity(0.08))
+                                            .background(selectedGameFilter == filter ? Color.purple : (colorScheme == .light ? Color.white : Color.white.opacity(0.08)))
                                             .cornerRadius(8)
                                             .overlay(
                                                 RoundedRectangle(cornerRadius: 8)
-                                                    .stroke(selectedGameFilter == filter ? Color.purple : Color.white.opacity(0.12), lineWidth: 1)
+                                                    .stroke(selectedGameFilter == filter ? Color.purple : (colorScheme == .light ? Color.black.opacity(0.12) : Color.white.opacity(0.12)), lineWidth: 1)
                                             )
                                     }
                                 }
                             }
-                            .padding(.horizontal, 24)
                         }
+                        .padding(.horizontal, 24)
                         .padding(.bottom, 4)
                         
                         if filteredAllPlayersSessions.isEmpty {
@@ -283,6 +284,7 @@ struct StatSummaryCard: View {
     let value: String
     let icon: String
     let color: Color
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -296,19 +298,19 @@ struct StatSummaryCard: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(value)
                     .font(.system(size: 26, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(colorScheme == .light ? .black : .white)
                 
                 Text(title)
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.white.opacity(0.6))
+                    .foregroundColor(colorScheme == .light ? Color.black.opacity(0.6) : Color.white.opacity(0.6))
             }
         }
         .padding(16)
-        .background(Color.white.opacity(0.05))
+        .background(colorScheme == .light ? Color.white : Color.white.opacity(0.05))
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                .stroke(colorScheme == .light ? Color.black.opacity(0.08) : Color.white.opacity(0.1), lineWidth: 1)
         )
     }
 }
@@ -318,6 +320,7 @@ struct PersonalBestRow: View {
     let score: Int
     let icon: String
     let color: Color
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         HStack(spacing: 16) {
@@ -334,25 +337,25 @@ struct PersonalBestRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(game)
                     .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(colorScheme == .light ? .black : .white)
                 
                 Text("High Score")
                     .font(.system(size: 12))
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(colorScheme == .light ? Color.black.opacity(0.6) : Color.white.opacity(0.5))
             }
             
             Spacer()
             
             Text("\(score)")
                 .font(.system(size: 22, weight: .bold, design: .rounded))
-                .foregroundColor(.yellow)
+                .foregroundColor(colorScheme == .light ? Color(red: 180/255, green: 130/255, blue: 0/255) : .yellow)
         }
         .padding(12)
-        .background(Color.white.opacity(0.04))
+        .background(colorScheme == .light ? Color.white : Color.white.opacity(0.04))
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                .stroke(colorScheme == .light ? Color.black.opacity(0.08) : Color.white.opacity(0.08), lineWidth: 1)
         )
     }
 }
@@ -361,6 +364,7 @@ struct GameProgressChart: View {
     let title: String
     let sessions: [GameSession]
     let themeColor: Color
+    @Environment(\.colorScheme) var colorScheme
     
     var chartData: [GameSession] {
         Array(sessions.prefix(7).reversed())
@@ -370,14 +374,14 @@ struct GameProgressChart: View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title)
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
-                .foregroundColor(.white.opacity(0.8))
+                .foregroundColor(colorScheme == .light ? .black : Color.white.opacity(0.8))
             
             if chartData.isEmpty {
                 HStack {
                     Spacer()
                     Text("No history. Complete a game to see data!")
                         .font(.system(size: 12))
-                        .foregroundColor(.white.opacity(0.35))
+                        .foregroundColor(colorScheme == .light ? Color.black.opacity(0.5) : Color.white.opacity(0.35))
                         .padding(.vertical, 30)
                     Spacer()
                 }
@@ -396,31 +400,32 @@ struct GameProgressChart: View {
                 .chartYAxis {
                     AxisMarks(position: .leading) { value in
                         AxisGridLine(stroke: StrokeStyle(lineWidth: 1))
-                            .foregroundStyle(Color.white.opacity(0.06))
+                            .foregroundStyle(colorScheme == .light ? Color.black.opacity(0.08) : Color.white.opacity(0.06))
                         AxisValueLabel()
-                            .foregroundStyle(Color.white.opacity(0.4))
+                            .foregroundStyle(colorScheme == .light ? Color.black.opacity(0.6) : Color.white.opacity(0.4))
                     }
                 }
                 .chartXAxis {
                     AxisMarks { _ in
                         AxisValueLabel()
-                            .foregroundStyle(Color.white.opacity(0.4))
+                            .foregroundStyle(colorScheme == .light ? Color.black.opacity(0.6) : Color.white.opacity(0.4))
                     }
                 }
             }
         }
         .padding(16)
-        .background(Color.white.opacity(0.04))
+        .background(colorScheme == .light ? Color.white : Color.white.opacity(0.04))
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                .stroke(colorScheme == .light ? Color.black.opacity(0.08) : Color.white.opacity(0.08), lineWidth: 1)
         )
     }
 }
 
 struct RecentSessionRow: View {
     let session: GameSession
+    @Environment(\.colorScheme) var colorScheme
     
     private var relativeTime: String {
         let formatter = RelativeDateTimeFormatter()
@@ -433,11 +438,11 @@ struct RecentSessionRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(session.gameMode)
                     .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(colorScheme == .light ? .black : .white)
                 
                 Text(relativeTime)
                     .font(.system(size: 11))
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(colorScheme == .light ? Color.black.opacity(0.6) : Color.white.opacity(0.5))
             }
             
             Spacer()
@@ -451,23 +456,51 @@ struct RecentSessionRow: View {
                 
                 Text("Score: \(session.score)")
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
-                    .foregroundColor(.white)
+                    .foregroundColor(colorScheme == .light ? .black : .white)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
-                    .background(Color.white.opacity(0.1))
+                    .background(colorScheme == .light ? Color.black.opacity(0.06) : Color.white.opacity(0.1))
                     .cornerRadius(8)
             }
         }
         .padding(12)
-        .background(Color.white.opacity(0.03))
+        .background(colorScheme == .light ? Color.white : Color.white.opacity(0.03))
         .cornerRadius(12)
     }
 }
 
-// MARK: - Leaderboard Row Component
 struct LeaderboardRow: View {
     let rank: Int
     let player: LeaderboardPlayer
+    @Environment(\.colorScheme) var colorScheme
+    
+    private var nameColor: Color {
+        if player.isUser {
+            return .purple
+        }
+        return colorScheme == .light ? .black : .white
+    }
+    
+    private var scoreColor: Color {
+        if player.isUser {
+            return .purple
+        }
+        return colorScheme == .light ? Color.black.opacity(0.7) : Color.white.opacity(0.6)
+    }
+    
+    private var rowBg: Color {
+        if player.isUser {
+            return Color.purple.opacity(0.12)
+        }
+        return colorScheme == .light ? Color.white : Color.white.opacity(0.04)
+    }
+    
+    private var rowStroke: Color {
+        if player.isUser {
+            return Color.purple.opacity(0.5)
+        }
+        return colorScheme == .light ? Color.black.opacity(0.08) : Color.white.opacity(0.08)
+    }
     
     var body: some View {
         HStack(spacing: 14) {
@@ -486,30 +519,30 @@ struct LeaderboardRow: View {
             
             Text(player.name)
                 .font(.system(size: 15, weight: player.isUser ? .heavy : .bold, design: .rounded))
-                .foregroundColor(player.isUser ? Color(red: 220/255, green: 180/255, blue: 255/255) : .white)
+                .foregroundColor(nameColor)
             
             Spacer()
             
             Text("\(player.score) pts")
                 .font(.system(size: 15, weight: .bold, design: .rounded))
-                .foregroundColor(player.isUser ? Color(red: 220/255, green: 180/255, blue: 255/255) : .white.opacity(0.6))
+                .foregroundColor(scoreColor)
         }
         .padding(14)
-        .background(player.isUser ? Color.purple.opacity(0.12) : Color.white.opacity(0.04))
+        .background(rowBg)
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(player.isUser ? Color.purple.opacity(0.5) : Color.white.opacity(0.08), lineWidth: player.isUser ? 1.5 : 1)
+                .stroke(rowStroke, lineWidth: player.isUser ? 1.5 : 1)
         )
         .shadow(color: player.isUser ? .purple.opacity(0.15) : .clear, radius: 6, x: 0, y: 3)
     }
     
     private func rankColor(_ rank: Int) -> Color {
         switch rank {
-        case 1:  return .yellow
-        case 2:  return Color(white: 0.82)
+        case 1:  return colorScheme == .light ? Color(red: 180/255, green: 130/255, blue: 0/255) : .yellow
+        case 2:  return colorScheme == .light ? Color(white: 0.45) : Color(white: 0.82)
         case 3:  return Color(red: 0.8, green: 0.52, blue: 0.32)
-        default: return .white.opacity(0.55)
+        default: return colorScheme == .light ? Color.black.opacity(0.55) : Color.white.opacity(0.55)
         }
     }
 }
@@ -517,6 +550,7 @@ struct LeaderboardRow: View {
 // MARK: - All Players Session Row Component
 struct AllPlayersSessionRow: View {
     let session: StatsView.PlayerGameSession
+    @Environment(\.colorScheme) var colorScheme
     
     private var relativeTime: String {
         let formatter = RelativeDateTimeFormatter()
@@ -533,7 +567,7 @@ struct AllPlayersSessionRow: View {
                 HStack(spacing: 6) {
                     Text(session.playerName)
                         .font(.system(size: 15, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .foregroundColor(colorScheme == .light ? .black : .white)
                     
                     Text(session.gameMode)
                         .font(.system(size: 10, weight: .bold, design: .rounded))
@@ -546,21 +580,21 @@ struct AllPlayersSessionRow: View {
                 
                 Text(relativeTime)
                     .font(.system(size: 11))
-                    .foregroundColor(.white.opacity(0.5))
+                    .foregroundColor(colorScheme == .light ? Color.black.opacity(0.6) : Color.white.opacity(0.5))
             }
             
             Spacer()
             
             Text("Score: \(session.score)")
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
-                .foregroundColor(.white)
+                .foregroundColor(colorScheme == .light ? .black : .white)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 4)
-                .background(Color.white.opacity(0.1))
+                .background(colorScheme == .light ? Color.black.opacity(0.06) : Color.white.opacity(0.1))
                 .cornerRadius(8)
         }
         .padding(12)
-        .background(Color.white.opacity(0.03))
+        .background(colorScheme == .light ? Color.white : Color.white.opacity(0.03))
         .cornerRadius(12)
     }
     

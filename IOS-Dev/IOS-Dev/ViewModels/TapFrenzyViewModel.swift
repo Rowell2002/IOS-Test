@@ -22,6 +22,11 @@ class TapFrenzyViewModel: ObservableObject {
     @Published var isPersonalBestSet = false
     @Published var activeBubble: PowerUpBubble? = nil
     
+    // Dynamic Button Motion & Shrink State
+    @Published var buttonSize: CGFloat = 200
+    @Published var buttonXOffset: CGFloat = 0
+    @Published var buttonYOffset: CGFloat = 0
+    
     private var bubbleTimeLeft = 0
     private var timerSubscription: AnyCancellable?
     
@@ -36,6 +41,13 @@ class TapFrenzyViewModel: ObservableObject {
             startTimer()
         }
         pressCount += 1
+        
+        // Shrink button by 3.5 points each tap (minimum size 80pt)
+        buttonSize = max(80, buttonSize - 3.5)
+        
+        // Move button to random position
+        buttonXOffset = CGFloat.random(in: -110...110)
+        buttonYOffset = CGFloat.random(in: -140...140)
         
         // Haptic feedback & Sound effect for tapping
         HapticManager.shared.impact(style: .light)
@@ -121,6 +133,9 @@ class TapFrenzyViewModel: ObservableObject {
         isPersonalBestSet = false
         activeBubble = nil
         bubbleTimeLeft = 0
+        buttonSize = 200
+        buttonXOffset = 0
+        buttonYOffset = 0
     }
     
     func cancelTimer() {

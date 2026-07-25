@@ -9,7 +9,16 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var authManager = AuthManager.shared
+    @AppStorage("appTheme") private var appTheme = "dark"
     @State private var isLoading = true
+    
+    private var colorScheme: ColorScheme? {
+        switch appTheme {
+        case "dark": return .dark
+        case "light": return .light
+        default: return nil
+        }
+    }
     
     var body: some View {
         ZStack {
@@ -25,6 +34,7 @@ struct ContentView: View {
                     .zIndex(1)
             }
         }
+        .preferredColorScheme(colorScheme)
         .animation(.easeInOut(duration: 0.5), value: isLoading)
     }
 }

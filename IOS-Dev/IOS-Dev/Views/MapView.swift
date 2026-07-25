@@ -15,6 +15,7 @@ struct MapView: View {
     }
     
     @ObservedObject var sessionManager = GameSessionManager.shared
+    @Environment(\.colorScheme) var colorScheme
     @State private var selectedSession: MapSession? = nil
     @State private var position: MapCameraPosition = .automatic
     
@@ -142,7 +143,7 @@ struct MapView: View {
                         
                         Text("Session Pins")
                             .font(.system(size: 26, weight: .bold, design: .rounded))
-                            .foregroundColor(.white)
+                            .foregroundColor(colorScheme == .light ? .black : .white)
                     }
                     
                     // Sliding Filters Control inside Card
@@ -155,14 +156,14 @@ struct MapView: View {
                                 }) {
                                     Text(filter)
                                         .font(.system(size: 12, weight: .bold, design: .rounded))
-                                        .foregroundColor(selectedFilter == filter ? Color.black : Color.white.opacity(0.8))
+                                        .foregroundColor(selectedFilter == filter ? (colorScheme == .light ? .white : .black) : (colorScheme == .light ? .black : .white.opacity(0.8)))
                                         .padding(.horizontal, 12)
                                         .padding(.vertical, 6)
-                                        .background(selectedFilter == filter ? Color.purple : Color.white.opacity(0.08))
+                                        .background(selectedFilter == filter ? Color.purple : (colorScheme == .light ? Color.black.opacity(0.06) : Color.white.opacity(0.08)))
                                         .cornerRadius(8)
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 8)
-                                                .stroke(selectedFilter == filter ? Color.purple : Color.white.opacity(0.12), lineWidth: 1)
+                                                .stroke(selectedFilter == filter ? Color.purple : (colorScheme == .light ? Color.black.opacity(0.12) : Color.white.opacity(0.12)), lineWidth: 1)
                                         )
                                 }
                             }
@@ -171,11 +172,11 @@ struct MapView: View {
                 }
                 .padding(16)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(.ultraThinMaterial)
+                .background(colorScheme == .light ? Color.white : Color(red: 20/255, green: 24/255, blue: 36/255).opacity(0.85))
                 .cornerRadius(18)
                 .overlay(
                     RoundedRectangle(cornerRadius: 18)
-                        .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                        .stroke(colorScheme == .light ? Color.black.opacity(0.1) : Color.white.opacity(0.12), lineWidth: 1)
                 )
                 .padding(.horizontal)
                 .padding(.top, 4)
@@ -190,7 +191,6 @@ struct MapView: View {
             }
             .padding(.bottom, 12)
         }
-        .preferredColorScheme(.dark)
         .onAppear {
             sessionManager.loadSessions()
             LocationManager.shared.requestPermission()
@@ -244,7 +244,7 @@ struct MapView: View {
                 HStack(spacing: 6) {
                     Text(session.gameMode)
                         .font(.system(size: 17, weight: .bold, design: .rounded))
-                        .foregroundColor(.white)
+                        .foregroundColor(colorScheme == .light ? .black : .white)
                     
                     if isHighest {
                         Text("PB 👑")
@@ -259,7 +259,7 @@ struct MapView: View {
                 
                 Text("Played by \(session.playerName)")
                     .font(.caption.bold())
-                    .foregroundColor(session.isCurrentUser ? Color(red: 220/255, green: 170/255, blue: 255/255) : .white.opacity(0.6))
+                    .foregroundColor(session.isCurrentUser ? Color.purple : (colorScheme == .light ? Color.black.opacity(0.65) : Color.white.opacity(0.6)))
                 
                 HStack(spacing: 6) {
                     Text(session.date, style: .date)
@@ -267,7 +267,7 @@ struct MapView: View {
                     Text(session.date, style: .time)
                 }
                 .font(.system(size: 10))
-                .foregroundColor(.white.opacity(0.4))
+                .foregroundColor(colorScheme == .light ? Color.black.opacity(0.5) : Color.white.opacity(0.4))
             }
             
             Spacer()
@@ -275,10 +275,10 @@ struct MapView: View {
             VStack(alignment: .trailing, spacing: 4) {
                 Text("\(session.score)")
                     .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(isHighest ? .yellow : colorForMode(session.gameMode))
+                    .foregroundColor(isHighest ? (colorScheme == .light ? Color(red: 180/255, green: 130/255, blue: 0/255) : .yellow) : colorForMode(session.gameMode))
                 Text("Score")
                     .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.white.opacity(0.4))
+                    .foregroundColor(colorScheme == .light ? Color.black.opacity(0.5) : Color.white.opacity(0.4))
             }
             
             Button(action: {
@@ -287,21 +287,21 @@ struct MapView: View {
                 }
             }) {
                 Image(systemName: "xmark.circle.fill")
-                    .foregroundColor(.white.opacity(0.3))
                     .font(.title3)
+                    .foregroundColor(colorScheme == .light ? Color.black.opacity(0.3) : Color.white.opacity(0.3))
             }
             .buttonStyle(PlainButtonStyle())
         }
         .padding()
-        .background(.ultraThinMaterial)
+        .background(colorScheme == .light ? Color.white : Color(red: 20/255, green: 24/255, blue: 36/255))
         .cornerRadius(18)
         .overlay(
             RoundedRectangle(cornerRadius: 18)
-                .stroke(isHighest ? Color.yellow.opacity(0.4) : Color.white.opacity(0.15), lineWidth: 1)
+                .stroke(isHighest ? Color.yellow.opacity(0.8) : (colorScheme == .light ? Color.black.opacity(0.1) : Color.white.opacity(0.15)), lineWidth: 1)
         )
         .padding(.horizontal)
         .padding(.bottom, 80) // Leave space for custom tab bar
-        .shadow(color: isHighest ? .yellow.opacity(0.1) : .black.opacity(0.4), radius: 10, x: 0, y: 5)
+        .shadow(color: isHighest ? .yellow.opacity(0.1) : (colorScheme == .light ? .black.opacity(0.08) : .black.opacity(0.4)), radius: 10, x: 0, y: 5)
     }
 }
 
